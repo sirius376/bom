@@ -254,16 +254,16 @@
   // 꽃 모양 마커 (모바일 최적화 사이즈)
   // 파스텔 색상 매핑 (구슬용 — 메인/하이라이트/그림자)
   const pastel = {
-    "벚꽃":   {main:"#F4A0A0", hi:"#FDDEDE", sh:"#C96B6B"},
-    "진달래": {main:"#A8D08D", hi:"#D6EFCA", sh:"#6B9E52"},
-    "유채꽃": {main:"#F7CF85", hi:"#FDF0C4", sh:"#C89A35"},
-    "산수유": {main:"#85C9A8", hi:"#C4EAD9", sh:"#3D9E76"},
-    "매화":   {main:"#C9A8D4", hi:"#E8D4F0", sh:"#8B5FA0"},
-    "장미":   {main:"#F4A0C0", hi:"#FDDEED", sh:"#C96B8A"},
-    "튤립":   {main:"#A8B8F4", hi:"#D4DCFD", sh:"#5A6EC9"},
-    "수선화": {main:"#A8D4E8", hi:"#D0EEF7", sh:"#4A9EC0"},
-    "철쭉":   {main:"#C4A8D4", hi:"#E4D4F0", sh:"#8A5FA0"},
-    "기타":   {main:"#C0BDB5", hi:"#E4E2DD", sh:"#8A8880"},
+    "벚꽃":   {main:"#F07070", hi:"#F9B8B8", sh:"#B84040"},
+    "진달래": {main:"#72B84E", hi:"#B8E09A", sh:"#3D7A28"},
+    "유채꽃": {main:"#F0AA30", hi:"#FAD878", sh:"#B87010"},
+    "산수유": {main:"#38B07A", hi:"#88DDB8", sh:"#1A7A50"},
+    "매화":   {main:"#A870C8", hi:"#D4A8E8", sh:"#7040A0"},
+    "장미":   {main:"#E8609A", hi:"#F5AACB", sh:"#B03070"},
+    "튤립":   {main:"#6888E8", hi:"#AAB8F8", sh:"#3848B8"},
+    "수선화": {main:"#40A8D0", hi:"#88D0EC", sh:"#1878A0"},
+    "철쭉":   {main:"#A870B8", hi:"#D0A0DC", sh:"#784090"},
+    "기타":   {main:"#909088", hi:"#C8C8C0", sh:"#585850"},
   };
 
   function makeIcon(cat, ongoing) {
@@ -282,16 +282,23 @@
     const cr = Math.round(6 * sc);   // 중심 원 반지름
 
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-      <ellipse cx="${px}" cy="${py - pr + pw}" rx="${pw}" ry="${pr}" fill="${p.main}" opacity="0.9"/>
-      <ellipse cx="${px}" cy="${py + pr - pw}" rx="${pw}" ry="${pr}" fill="${p.main}" opacity="0.9"/>
-      <ellipse cx="${px - pr + pw}" cy="${py}" rx="${pr}" ry="${pw}" fill="${p.main}" opacity="0.9"/>
-      <ellipse cx="${px + pr - pw}" cy="${py}" rx="${pr}" ry="${pw}" fill="${p.main}" opacity="0.9"/>
-      <ellipse cx="${px - Math.round(pr*0.6)}" cy="${py - Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(-45 ${px - Math.round(pr*0.6)} ${py - Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.85"/>
-      <ellipse cx="${px + Math.round(pr*0.6)}" cy="${py - Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(45 ${px + Math.round(pr*0.6)} ${py - Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.85"/>
-      <ellipse cx="${px - Math.round(pr*0.6)}" cy="${py + Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(45 ${px - Math.round(pr*0.6)} ${py + Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.85"/>
-      <ellipse cx="${px + Math.round(pr*0.6)}" cy="${py + Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(-45 ${px + Math.round(pr*0.6)} ${py + Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.85"/>
-      <circle cx="${cx}" cy="${cx}" r="${cr}" fill="${p.sh}" opacity="0.95"/>
-      <circle cx="${cx}" cy="${cx}" r="${dotR + 1}" fill="${dotFill}" opacity="0.92" ${dotClass}/>
+      <defs>
+        <filter id="fs" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="rgba(0,0,0,0.28)"/>
+        </filter>
+      </defs>
+      <g filter="url(#fs)">
+        <ellipse cx="${px}" cy="${py - pr + pw}" rx="${pw}" ry="${pr}" fill="${p.main}" opacity="0.95"/>
+        <ellipse cx="${px}" cy="${py + pr - pw}" rx="${pw}" ry="${pr}" fill="${p.main}" opacity="0.95"/>
+        <ellipse cx="${px - pr + pw}" cy="${py}" rx="${pr}" ry="${pw}" fill="${p.main}" opacity="0.95"/>
+        <ellipse cx="${px + pr - pw}" cy="${py}" rx="${pr}" ry="${pw}" fill="${p.main}" opacity="0.95"/>
+        <ellipse cx="${px - Math.round(pr*0.6)}" cy="${py - Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(-45 ${px - Math.round(pr*0.6)} ${py - Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.9"/>
+        <ellipse cx="${px + Math.round(pr*0.6)}" cy="${py - Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(45 ${px + Math.round(pr*0.6)} ${py - Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.9"/>
+        <ellipse cx="${px - Math.round(pr*0.6)}" cy="${py + Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(45 ${px - Math.round(pr*0.6)} ${py + Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.9"/>
+        <ellipse cx="${px + Math.round(pr*0.6)}" cy="${py + Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(-45 ${px + Math.round(pr*0.6)} ${py + Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.9"/>
+        <circle cx="${cx}" cy="${cx}" r="${cr}" fill="${p.sh}" opacity="0.95"/>
+        <circle cx="${cx}" cy="${cx}" r="${dotR + 1}" fill="${dotFill}" opacity="0.92" ${dotClass}/>
+      </g>
     </svg>`;
 
     return L.divIcon({
