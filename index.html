@@ -170,6 +170,22 @@
       display: inline-block; font-size: 11px; font-weight: 500;
       padding: 3px 9px; border-radius: 10px;
     }
+    .pop-ticket {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 8px; padding: 7px 10px;
+      background: #F7F7F7; border-radius: 8px;
+      font-size: 12px;
+    }
+    .pop-ticket-label { color: #888; font-size: 11px; }
+    .pop-ticket-price { font-weight: 700; color: #1A1A1A; font-size: 12px; }
+    .pop-link {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      width: 100%; margin-top: 8px; padding: 8px 0;
+      background: white; color: #1A1A1A; border-radius: 8px;
+      border: 1px solid #E0E0E0;
+      font-size: 12px; font-weight: 700; text-decoration: none;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
     .pop-ongoing {
       display: inline-block; font-size: 10px; font-weight: 700;
       padding: 2px 8px; border-radius: 10px;
@@ -282,6 +298,7 @@
     <div class="leg-row"><div class="leg-dot" style="background:#38B07A"></div>산수유·매화</div>
     <div class="leg-row"><div class="leg-dot" style="background:#E8609A"></div>장미</div>
     <div class="leg-row"><div class="leg-dot" style="background:#6888E8"></div>튤립·수선화</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#9B59B6"></div>음악</div>
     <div class="leg-row"><div class="leg-dot" style="background:#909088"></div>기타</div>
   </div>
 
@@ -308,6 +325,7 @@
     <button class="f-btn" data-cat="튤립"   style="--c:#6888E8">🌷 튤립</button>
     <button class="f-btn" data-cat="수선화" style="--c:#40A8D0">💐 수선화</button>
     <button class="f-btn" data-cat="철쭉"   style="--c:#A870B8">🌸 철쭉</button>
+    <button class="f-btn" data-cat="음악"   style="--c:#9B59B6">🎵 음악</button>
     <button class="f-btn" data-cat="기타"   style="--c:#909088">🎪 기타</button>
   </div>
 
@@ -438,16 +456,22 @@
     {name:"천리포수목원 목련축제",region:"충남 태안",period:"3.27 ~ 4.19",place:"천리포수목원",cat:"기타",lat:36.8116,lng:126.3002,start:"2026-03-27",end:"2026-04-19"},
     {name:"태안세계튤립꽃박람회",region:"충남 태안",period:"4.1 ~ 5.6",place:"네이처월드",cat:"튤립",lat:36.7451,lng:126.2973,start:"2026-04-01",end:"2026-05-06"},
     {name:"청풍호 벚꽃축제",region:"충북 제천",period:"4.4 ~ 4.19",place:"청풍호 일대",cat:"벚꽃",lat:36.9927,lng:128.1673,start:"2026-04-04",end:"2026-04-19"},
+    {name:"PROMPT",region:"강원 화천",period:"5.9 ~ 5.10",place:"강원 화천군 화천읍 호음로 215",cat:"음악",lat:38.1064,lng:127.7083,start:"2026-05-09",end:"2026-05-10",link:"https://www.instagram.com/prompt_kr/",ticket:"89,000원"},
+    {name:"청남대 재즈토닉",region:"충북 청주",period:"5.23 ~ 5.24",place:"충청북도 청주시 서원구 사운로 59-1",cat:"음악",lat:36.4601,lng:127.4285,start:"2026-05-23",end:"2026-05-24",link:"https://jazztonicfestival.com/",ticket:"30,000원 ~ 55,000원"},
+    {name:"뷰티풀 민트 라이프",region:"서울 마포",period:"5.30 ~ 5.31",place:"마포구 성산동 670",cat:"음악",lat:37.5654,lng:126.9026,start:"2026-05-30",end:"2026-05-31",link:"https://www.mintpaper.co.kr/",ticket:"1일권 121,000원"},
+    {name:"DMZ 피스트레인",region:"강원 철원",period:"6.12 ~ 6.14",place:"강원 철원군 동송읍 태봉로 1825",cat:"음악",lat:38.2319,lng:127.2370,start:"2026-06-12",end:"2026-06-14",link:"https://dmzpeacetrain.com/",ticket:"79,200원 ~ 138,600원"},
   ];
 
   const catColor = {
     "벚꽃":"#D85A30","진달래":"#639922","유채꽃":"#EF9F27",
     "산수유":"#1D9E75","매화":"#1D9E75","장미":"#D4537E",
-    "튤립":"#7F77DD","수선화":"#7F77DD","철쭉":"#888780","기타":"#888780"
+    "튤립":"#7F77DD","수선화":"#7F77DD","철쭉":"#888780","기타":"#888780",
+    "음악":"#9B59B6"
   };
   const catEmoji = {
     "벚꽃":"🌸","진달래":"🌺","유채꽃":"🌼","산수유":"🌿","매화":"🌸",
-    "장미":"🌹","튤립":"🌷","수선화":"💐","철쭉":"🌸","기타":"🎪"
+    "장미":"🌹","튤립":"🌷","수선화":"💐","철쭉":"🌸","기타":"🎪",
+    "음악":"🎵"
   };
 
   const today = new Date();
@@ -471,6 +495,7 @@
     "수선화": {main:"#40A8D0", sh:"#1878A0"},
     "철쭉":   {main:"#A870B8", sh:"#784090"},
     "기타":   {main:"#909088", sh:"#585850"},
+    "음악":   {main:"#9B59B6", sh:"#6C3483"},
   };
 
   function makeIcon(cat, ongoing) {
@@ -521,6 +546,19 @@
     const e = catEmoji[f.cat] || "🎪";
     const kakaoUrl = `https://map.kakao.com/link/to/${encodeURIComponent(f.name)},${f.lat},${f.lng}`;
     const ongoingBadge = ongoing ? `<span class="pop-ongoing">🟢 진행중</span>` : '';
+
+    // 음악 축제 전용 — 티켓가격 + 링크
+    const ticketRow = f.ticket
+      ? `<div class="pop-ticket">
+          <span class="pop-ticket-label">🎟 티켓</span>
+          <span class="pop-ticket-price">${f.ticket}</span>
+        </div>` : '';
+    const linkBtn = f.link
+      ? `<a class="pop-link" href="${f.link}" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          공식 사이트 바로가기
+        </a>` : '';
+
     return `<div class="pop-wrap">
       <div class="pop-header">
         <span class="pop-badge" style="background:${c}18;color:${c};border:1px solid ${c}44">${e} ${f.cat}</span>
@@ -530,6 +568,8 @@
       <div class="pop-row">📅 <b>${f.period}</b></div>
       <div class="pop-row">📍 ${f.place}</div>
       <div class="pop-row" style="margin-top:2px;font-size:11px;color:#aaa">${f.region}</div>
+      ${ticketRow}
+      ${linkBtn}
       <a class="pop-kakao" href="${kakaoUrl}" target="_blank">🗺 카카오맵으로 길찾기</a>
     </div>`;
   }
