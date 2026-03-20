@@ -8,7 +8,6 @@
   <!-- SEO -->
   <meta name="description" content="2026년 전국 봄꽃 축제 지도. 벚꽃, 진달래, 유채꽃, 튤립, 장미 등 50개 축제 일정과 위치를 한눈에 확인하세요. 진해 군항제, 여의도 벚꽃축제, 광양 매화축제 등."/>
   <meta name="keywords" content="봄꽃축제, 벚꽃축제, 2026벚꽃, 진해군항제, 여의도벚꽃, 광양매화, 구례산수유, 봄축제일정, 전국꽃축제, 봄여행"/>
-  <meta name="naver-site-verification" content="9b92881acc9e661dd66f7448356c879b1c38c6d9" />
   <meta name="author" content="bomgoat"/>
   <meta name="robots" content="index, follow"/>
   <link rel="canonical" href="https://bomgoat.com"/>
@@ -72,7 +71,7 @@
       display: flex; align-items: center; justify-content: center;
       width: 32px; height: 32px; border-radius: 50%;
       background: var(--bg); border: 1px solid var(--border);
-      text-decoration: none; transition: background 0.15s;
+      text-decoration: none; transition: background 0.15s; cursor: pointer;
     }
     #mail-btn:hover { background: #f0f0f0; }
     #header .count-badge {
@@ -253,12 +252,12 @@
   <div id="header">
     <div class="logo">🌸 <span>봄꽃</span></div>
     <div class="right-wrap">
-      <a href="mailto:moon-in@kakao.com" id="mail-btn" title="문의하기">
+      <div id="mail-btn" title="문의하기" onclick="document.getElementById('mail-modal').style.display='flex'">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="4" width="20" height="16" rx="2"/>
           <path d="M2 7l10 7 10-7"/>
         </svg>
-      </a>
+      </div>
       <div class="count-badge" id="cnt-badge">전국 50개 축제</div>
     </div>
   </div>
@@ -685,6 +684,21 @@
     btn.classList.add('active');
     render(btn.dataset.cat);
   });
-  </script>
+  <!-- 문의 모달 -->
+  <div id="mail-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:white;border-radius:20px;padding:28px 24px;width:88%;max-width:320px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+      <div style="font-size:28px;margin-bottom:10px;">✉️</div>
+      <div style="font-size:15px;font-weight:700;color:#1A1A1A;margin-bottom:6px;">문의하기</div>
+      <div style="font-size:12px;color:#888;margin-bottom:18px;">봄꽃 축제 정보 추가 및 오류 제보 환영해요!</div>
+      <div id="mail-addr" style="background:#FFF5F5;border:1px solid #FFD0D0;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;color:#D94F4F;margin-bottom:14px;cursor:pointer;user-select:all;" onclick="
+        navigator.clipboard.writeText('moon-in@kakao.com');
+        this.textContent='✅ 복사됐어요!';
+        setTimeout(()=>this.textContent='moon-in@kakao.com',2000);
+      ">moon-in@kakao.com</div>
+      <a href="mailto:moon-in@kakao.com" style="display:block;padding:10px;background:#FF6B6B;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:8px;">메일 앱으로 열기</a>
+      <button onclick="document.getElementById('mail-modal').style.display='none'" style="width:100%;padding:9px;background:none;border:1px solid #eee;border-radius:10px;font-size:13px;color:#888;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">닫기</button>
+    </div>
+  </div>
+
 </body>
 </html>
