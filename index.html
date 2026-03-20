@@ -629,3 +629,133 @@
     const el = document.getElementById('visitor-cnt');
 
     // 초기 카운트업 애니메이션
+    const from = Math.max(count - 150, REAL_BASE);
+    const duration = 1400;
+    const t0 = performance.now();
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+    function countUp(ts) {
+      const p = Math.min((ts - t0) / duration, 1);
+      el.textContent = Math.floor(from + (count - from) * easeOut(p)).toLocaleString();
+      if (p < 1) requestAnimationFrame(countUp);
+      else {
+        el.textContent = count.toLocaleString();
+        startLiveCount();
+      }
+    }
+    requestAnimationFrame(countUp);
+
+    // 시간대별 증가 간격
+    // 낮 07~22시: 4~9초, 밤 22~07시: 30~60초
+    function getDelay() {
+      const h = new Date().getHours();
+      return (h >= 22 || h < 7)
+        ? 30000 + Math.random() * 30000
+        : 4000  + Math.random() * 5000;
+    }
+
+    function startLiveCount() {
+      function scheduleNext() {
+        setTimeout(() => {
+          count++;
+          localStorage.setItem('bom_visitor', count);
+          el.textContent = count.toLocaleString();
+          scheduleNext();
+        }, getDelay());
+      }
+      scheduleNext();
+    }
+  })();
+
+  renderTicker();
+
+  document.getElementById('list-btn').addEventListener('click', () => {
+    document.getElementById('list-panel').classList.toggle('open');
+  });
+  document.getElementById('list-close').addEventListener('click', () => {
+    document.getElementById('list-panel').classList.remove('open');
+  });
+  map.on('click', () => {
+    document.getElementById('list-panel').classList.remove('open');
+  });
+
+  // 최초 렌더
+  render("전체");
+
+  // 진행중 배지 — 전체 기준 진행중 개수 항상 표시
+  const allOngoing = festivals.filter(f => isOngoing(f));
+  const ongoingBarEl = document.getElementById('ongoing-bar');
+  document.getElementById('ongoing-cnt').textContent = allOngoing.length;
+  ongoingBarEl.style.display = allOngoing.length > 0 ? 'block' : 'none';
+
+  // 진행중 배지 클릭 토글
+  let ongoingMode = false;
+  ongoingBarEl.addEventListener('click', () => {
+    ongoingMode = !ongoingMode;
+
+    if (ongoingMode) {
+      // 활성: 초록 스타일
+      ongoingBarEl.style.background = '#2ECC71';
+      ongoingBarEl.style.color = 'white';
+      ongoingBarEl.style.borderColor = '#1aab5a';
+
+      // 모든 마커 지우고 진행중만 새로 그리기
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+      ongoingMarkers = [];
+
+      allOngoing.forEach(f => {
+        const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, true), zIndexOffset: 1000})
+          .bindPopup(makePopup(f, true), {maxWidth:240, closeButton:true, autoClose:false, closeOnClick:false})
+          .addTo(map);
+        m.on('click', () => { closeAll(); setTimeout(() => m.openPopup(), 10); });
+        markers.push(m);
+        ongoingMarkers.push(m);
+      });
+
+      document.getElementById('cnt-badge').textContent = `진행중 ${allOngoing.length}개`;
+      renderCards(allOngoing);
+
+    } else {
+      // 비활성: 원래 스타일 복원
+      ongoingBarEl.style.background = '';
+      ongoingBarEl.style.color = '';
+      ongoingBarEl.style.borderColor = '';
+
+      // 현재 선택된 필터로 복원
+      const activeBtn = document.querySelector('.f-btn.active');
+      render(activeBtn ? activeBtn.dataset.cat : '전체');
+    }
+  });
+
+  // 하단 필터 클릭 시 진행중 모드 해제
+  document.getElementById('filter-bar').addEventListener('click', e => {
+    const btn = e.target.closest('.f-btn');
+    if (!btn) return;
+    ongoingMode = false;
+    ongoingBarEl.style.background = '';
+    ongoingBarEl.style.color = '';
+    ongoingBarEl.style.borderColor = '';
+    document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.cat);
+  });
+  </script>
+
+  <!-- 문의 모달 -->
+  <div id="mail-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:white;border-radius:20px;padding:28px 24px;width:88%;max-width:320px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+      <div style="font-size:28px;margin-bottom:10px;">✉️</div>
+      <div style="font-size:15px;font-weight:700;color:#1A1A1A;margin-bottom:6px;">문의하기</div>
+      <div style="font-size:12px;color:#888;margin-bottom:18px;">봄꽃 축제 정보 추가 및 오류 제보 환영해요!</div>
+      <div id="mail-addr" style="background:#FFF5F5;border:1px solid #FFD0D0;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;color:#D94F4F;margin-bottom:14px;cursor:pointer;user-select:all;" onclick="
+        navigator.clipboard.writeText('moon-in@kakao.com');
+        this.textContent='✅ 복사됐어요!';
+        setTimeout(()=>this.textContent='moon-in@kakao.com',2000);
+      ">moon-in@kakao.com</div>
+      <a href="mailto:moon-in@kakao.com" style="display:block;padding:10px;background:#FF6B6B;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:8px;">메일 앱으로 열기</a>
+      <button onclick="document.getElementById('mail-modal').style.display='none'" style="width:100%;padding:9px;background:none;border:1px solid #eee;border-radius:10px;font-size:13px;color:#888;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">닫기</button>
+    </div>
+  </div>
+
+</body>
+</html>
