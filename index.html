@@ -617,19 +617,24 @@
 
   // 방문자 카운터 — localStorage로 세션 간 유지
   (function() {
-    const REAL_BASE = 1701;   // 실제 누적값 (업데이트 필요시 이 숫자만 변경)
-    const stored = parseInt(localStorage.getItem('bom_visitor') || '0');
+    const REAL_BASE = 1701;         // 현재 실제 누적값 (3시간 기준)
+    const START_DATE = new Date('2026-03-20T00:00:00');
+    const now = new Date();
+    const hoursElapsed = (now - START_DATE) / 3600000; // 서비스 오픈 후 경과 시간(시)
+    const hourlyAvg = 567;          // 시간당 평균 방문자 (1700 / 3시간)
 
-    // 저장값이 실제값보다 너무 크면 리셋 (비정상 누적 방지)
-    let count = (stored >= REAL_BASE && stored <= REAL_BASE + 5000)
-      ? stored
-      : REAL_BASE;
+    // 경과 시간 기반 추정값
+    const serverEstimate = REAL_BASE + Math.floor(Math.max(0, hoursElapsed - 3) * hourlyAvg);
+
+    // localStorage에서 이전 값 불러오기 (절대 줄어들지 않도록)
+    const stored = parseInt(localStorage.getItem('bom_visitor') || '0');
+    let count = Math.max(stored, serverEstimate);
     localStorage.setItem('bom_visitor', count);
 
     const el = document.getElementById('visitor-cnt');
 
     // 초기 카운트업 애니메이션
-    const from = Math.max(count - 150, REAL_BASE);
+    const from = Math.max(count - 200, REAL_BASE);
     const duration = 1400;
     const t0 = performance.now();
     function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
@@ -644,23 +649,24 @@
     }
     requestAnimationFrame(countUp);
 
-    // 시간대별 증가 간격
-    // 낮 07~22시: 4~9초, 밤 22~07시: 30~60초
+    // 시간대별 증가 간격 설정
+    // 밤 22시~07시: 느리게 (30~60초), 낮: 빠르게 (4~9초)
     function getDelay() {
       const h = new Date().getHours();
-      return (h >= 22 || h < 7)
-        ? 30000 + Math.random() * 30000
-        : 4000  + Math.random() * 5000;
+      const isNight = h >= 22 || h < 7;
+      return isNight
+        ? 30000 + Math.random() * 30000   // 밤: 30~60초
+        : 4000  + Math.random() * 5000;   // 낮: 4~9초
     }
-
     function startLiveCount() {
       function scheduleNext() {
+        const delay = getDelay();
         setTimeout(() => {
           count++;
           localStorage.setItem('bom_visitor', count);
           el.textContent = count.toLocaleString();
           scheduleNext();
-        }, getDelay());
+        }, delay);
       }
       scheduleNext();
     }
