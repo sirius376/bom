@@ -617,25 +617,25 @@
 
   // 방문자 카운터 — localStorage로 세션 간 유지
   (function() {
-    const REAL_BASE = 1701;
-    const START_DATE = new Date('2026-03-20');
+    const REAL_BASE = 1749;         // 현재 실제 누적값 (3시간 기준)
+    const START_DATE = new Date('2026-03-20T00:00:00');
     const now = new Date();
-    const days = Math.floor((now - START_DATE) / 86400000);
-    const hoursToday = now.getHours() + now.getMinutes() / 60;
-    const todayEstimate = Math.floor(120 * (hoursToday / 24));
-    const serverEstimate = REAL_BASE + (days * 120) + todayEstimate;
+    const hoursElapsed = (now - START_DATE) / 3600000; // 서비스 오픈 후 경과 시간(시)
+    const hourlyAvg = 240;          // 시간당 평균 방문자 (1700 / 3시간)
 
-    // localStorage에서 이전 값 불러오기
+    // 경과 시간 기반 추정값
+    const serverEstimate = REAL_BASE + Math.floor(Math.max(0, hoursElapsed - 3) * hourlyAvg);
+
+    // localStorage에서 이전 값 불러오기 (절대 줄어들지 않도록)
     const stored = parseInt(localStorage.getItem('bom_visitor') || '0');
-    // 저장값과 추정값 중 더 큰 값 사용 (절대 줄어들지 않도록)
     let count = Math.max(stored, serverEstimate);
     localStorage.setItem('bom_visitor', count);
 
     const el = document.getElementById('visitor-cnt');
 
     // 초기 카운트업 애니메이션
-    const from = count - 60;
-    const duration = 1200;
+    const from = Math.max(count - 200, REAL_BASE);
+    const duration = 1400;
     const t0 = performance.now();
     function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
     function countUp(ts) {
@@ -649,10 +649,10 @@
     }
     requestAnimationFrame(countUp);
 
-    // 불규칙한 간격으로 +1씩 증가 (4~18초)
+    // 시간당 567명 기준 → 평균 6.3초마다 1명 → 4~9초 랜덤 간격
     function startLiveCount() {
       function scheduleNext() {
-        const delay = 4000 + Math.random() * 14000;
+        const delay = 4000 + Math.random() * 5000;
         setTimeout(() => {
           count++;
           localStorage.setItem('bom_visitor', count);
