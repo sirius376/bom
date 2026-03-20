@@ -71,11 +71,14 @@
     .f-btn {
       flex-shrink: 0; font-family: 'Noto Sans KR', sans-serif;
       font-size: 12px; font-weight: 500; padding: 6px 13px;
-      border-radius: 20px; border: 1px solid var(--border);
+      border-radius: 20px; border: 1.5px solid var(--border);
       background: #F7F7F7; color: var(--text-sub); cursor: pointer;
       transition: all 0.18s; white-space: nowrap;
     }
-    .f-btn.active { background: var(--pink); color: white; border-color: var(--pink); }
+    .f-btn:not([style]):hover { background: #EFEFEF; }
+    .f-btn[style]:not(.active) { border-color: var(--c); color: var(--c); background: white; }
+    .f-btn.active { background: var(--c, var(--pink)); color: white; border-color: var(--c, var(--pink)); }
+    .f-btn:not([style]).active { background: var(--pink); color: white; border-color: var(--pink); }
 
     #legend {
       position: absolute; top: 62px; left: 10px; z-index: 500;
@@ -152,29 +155,29 @@
   <div id="map"></div>
 
   <div id="legend">
-    <div class="leg-row"><div class="leg-dot" style="background:#D85A30"></div>벚꽃</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#639922"></div>진달래</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#EF9F27"></div>유채꽃</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#1D9E75"></div>산수유·매화</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#D4537E"></div>장미</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#7F77DD"></div>튤립·수선화</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#888780"></div>기타</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#F07070"></div>벚꽃</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#72B84E"></div>진달래</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#F0AA30"></div>유채꽃</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#38B07A"></div>산수유·매화</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#E8609A"></div>장미</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#6888E8"></div>튤립·수선화</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#909088"></div>기타</div>
   </div>
 
   <div id="ongoing-bar"><b id="ongoing-cnt">0</b>개 축제 진행중 🌸</div>
 
   <div id="filter-bar">
     <button class="f-btn active" data-cat="전체">전체</button>
-    <button class="f-btn" data-cat="벚꽃">🌸 벚꽃</button>
-    <button class="f-btn" data-cat="진달래">진달래</button>
-    <button class="f-btn" data-cat="유채꽃">유채꽃</button>
-    <button class="f-btn" data-cat="산수유">산수유</button>
-    <button class="f-btn" data-cat="매화">매화</button>
-    <button class="f-btn" data-cat="장미">장미</button>
-    <button class="f-btn" data-cat="튤립">튤립</button>
-    <button class="f-btn" data-cat="수선화">수선화</button>
-    <button class="f-btn" data-cat="철쭉">철쭉</button>
-    <button class="f-btn" data-cat="기타">기타</button>
+    <button class="f-btn" data-cat="벚꽃"   style="--c:#F07070">🌸 벚꽃</button>
+    <button class="f-btn" data-cat="진달래" style="--c:#72B84E">진달래</button>
+    <button class="f-btn" data-cat="유채꽃" style="--c:#F0AA30">🌼 유채꽃</button>
+    <button class="f-btn" data-cat="산수유" style="--c:#38B07A">산수유</button>
+    <button class="f-btn" data-cat="매화"   style="--c:#A870C8">매화</button>
+    <button class="f-btn" data-cat="장미"   style="--c:#E8609A">🌹 장미</button>
+    <button class="f-btn" data-cat="튤립"   style="--c:#6888E8">🌷 튤립</button>
+    <button class="f-btn" data-cat="수선화" style="--c:#40A8D0">수선화</button>
+    <button class="f-btn" data-cat="철쭉"   style="--c:#A870B8">철쭉</button>
+    <button class="f-btn" data-cat="기타"   style="--c:#909088">기타</button>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -252,52 +255,40 @@
   }
 
   // 꽃 모양 마커 (모바일 최적화 사이즈)
-  // 파스텔 색상 매핑 (구슬용 — 메인/하이라이트/그림자)
   const pastel = {
-    "벚꽃":   {main:"#F07070", hi:"#F9B8B8", sh:"#B84040"},
-    "진달래": {main:"#72B84E", hi:"#B8E09A", sh:"#3D7A28"},
-    "유채꽃": {main:"#F0AA30", hi:"#FAD878", sh:"#B87010"},
-    "산수유": {main:"#38B07A", hi:"#88DDB8", sh:"#1A7A50"},
-    "매화":   {main:"#A870C8", hi:"#D4A8E8", sh:"#7040A0"},
-    "장미":   {main:"#E8609A", hi:"#F5AACB", sh:"#B03070"},
-    "튤립":   {main:"#6888E8", hi:"#AAB8F8", sh:"#3848B8"},
-    "수선화": {main:"#40A8D0", hi:"#88D0EC", sh:"#1878A0"},
-    "철쭉":   {main:"#A870B8", hi:"#D0A0DC", sh:"#784090"},
-    "기타":   {main:"#909088", hi:"#C8C8C0", sh:"#585850"},
+    "벚꽃":   {main:"#F07070", sh:"#B84040"},
+    "진달래": {main:"#72B84E", sh:"#3D7A28"},
+    "유채꽃": {main:"#F0AA30", sh:"#B87010"},
+    "산수유": {main:"#38B07A", sh:"#1A7A50"},
+    "매화":   {main:"#A870C8", sh:"#7040A0"},
+    "장미":   {main:"#E8609A", sh:"#B03070"},
+    "튤립":   {main:"#6888E8", sh:"#3848B8"},
+    "수선화": {main:"#40A8D0", sh:"#1878A0"},
+    "철쭉":   {main:"#A870B8", sh:"#784090"},
+    "기타":   {main:"#909088", sh:"#585850"},
   };
 
   function makeIcon(cat, ongoing) {
     const p = pastel[cat] || pastel["기타"];
-    const size = ongoing ? 46 : 36;
+    const size = ongoing ? 44 : 34;
     const cx = size / 2;
-    const sc = size / 36; // scale factor
-    const dotClass = ongoing ? 'class="marker-dot-ongoing"' : '';
+    const r = cx - 3;
     const dotFill = ongoing ? "#2ECC71" : "white";
-    const dotR = Math.round(3.5 * sc);
-
-    // 꽃잎 4장 — 위아래좌우 타원
-    const px = cx, py = cx;
-    const pr = Math.round(7 * sc);   // 꽃잎 반지름 (긴 쪽)
-    const pw = Math.round(4 * sc);   // 꽃잎 폭 (짧은 쪽)
-    const cr = Math.round(6 * sc);   // 중심 원 반지름
+    const dotR = ongoing ? Math.round(r * 0.38) : Math.round(r * 0.35);
+    const dotClass = ongoing ? 'class="marker-dot-ongoing"' : '';
+    const fid = `sh${cat.charCodeAt(0)}${ongoing?1:0}`;
 
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
       <defs>
-        <filter id="fs" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="rgba(0,0,0,0.28)"/>
+        <filter id="${fid}" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="rgba(0,0,0,0.32)"/>
         </filter>
       </defs>
-      <g filter="url(#fs)">
-        <ellipse cx="${px}" cy="${py - pr + pw}" rx="${pw}" ry="${pr}" fill="${p.main}" opacity="0.95"/>
-        <ellipse cx="${px}" cy="${py + pr - pw}" rx="${pw}" ry="${pr}" fill="${p.main}" opacity="0.95"/>
-        <ellipse cx="${px - pr + pw}" cy="${py}" rx="${pr}" ry="${pw}" fill="${p.main}" opacity="0.95"/>
-        <ellipse cx="${px + pr - pw}" cy="${py}" rx="${pr}" ry="${pw}" fill="${p.main}" opacity="0.95"/>
-        <ellipse cx="${px - Math.round(pr*0.6)}" cy="${py - Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(-45 ${px - Math.round(pr*0.6)} ${py - Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.9"/>
-        <ellipse cx="${px + Math.round(pr*0.6)}" cy="${py - Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(45 ${px + Math.round(pr*0.6)} ${py - Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.9"/>
-        <ellipse cx="${px - Math.round(pr*0.6)}" cy="${py + Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(45 ${px - Math.round(pr*0.6)} ${py + Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.9"/>
-        <ellipse cx="${px + Math.round(pr*0.6)}" cy="${py + Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(-45 ${px + Math.round(pr*0.6)} ${py + Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.9"/>
-        <circle cx="${cx}" cy="${cx}" r="${cr}" fill="${p.sh}" opacity="0.95"/>
-        <circle cx="${cx}" cy="${cx}" r="${dotR + 1}" fill="${dotFill}" opacity="0.92" ${dotClass}/>
+      <g filter="url(#${fid})">
+        <circle cx="${cx}" cy="${cx}" r="${r}" fill="${p.main}"/>
+        <circle cx="${cx}" cy="${cx}" r="${r - 2.5}" fill="${p.main}" opacity="0.15"/>
+        <circle cx="${cx}" cy="${cx}" r="${dotR + 2}" fill="white" opacity="0.9"/>
+        <circle cx="${cx}" cy="${cx}" r="${dotR}" fill="${dotFill}" opacity="0.95" ${dotClass}/>
       </g>
     </svg>`;
 
@@ -305,7 +296,7 @@
       html: svg, className: '',
       iconSize: [size, size],
       iconAnchor: [cx, cx],
-      popupAnchor: [0, -(cx + 8)]
+      popupAnchor: [0, -(cx + 6)]
     });
   }
 
