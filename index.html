@@ -445,6 +445,55 @@
   let markers = [];
   let ongoingMarkers = [];
 
+  function closeAll() { markers.forEach(m => m.closePopup()); }
+
+  function makePopup(f, ongoing) {
+    const c = catColor[f.cat] || "#888780";
+    const e = catEmoji[f.cat] || "🎪";
+    const kakaoUrl = `https://map.kakao.com/link/to/${encodeURIComponent(f.name)},${f.lat},${f.lng}`;
+    const ongoingBadge = ongoing ? `<span class="pop-ongoing">🟢 진행중</span>` : '';
+    return `<div class="pop-wrap">
+      <div class="pop-header">
+        <span class="pop-badge" style="background:${c}18;color:${c};border:1px solid ${c}44">${e} ${f.cat}</span>
+        ${ongoingBadge}
+      </div>
+      <div class="pop-name">${f.name}</div>
+      <div class="pop-row">📅 <b>${f.period}</b></div>
+      <div class="pop-row">📍 ${f.place}</div>
+      <div class="pop-row" style="margin-top:2px;font-size:11px;color:#aaa">${f.region}</div>
+      <a class="pop-kakao" href="${kakaoUrl}" target="_blank">🗺 카카오맵으로 길찾기</a>
+    </div>`;
+  }
+
+  function renderCards(data) {
+    const scroll = document.getElementById('list-scroll');
+    document.getElementById('list-cnt').textContent = `${data.length}개`;
+    const sorted = [...data].sort((a,b) => isOngoing(b) - isOngoing(a));
+    scroll.innerHTML = sorted.map((f,i) => {
+      const p = pastel[f.cat] || pastel["기타"];
+      const ongoing = isOngoing(f);
+      return `<div class="card" data-idx="${i}" data-lat="${f.lat}" data-lng="${f.lng}">
+        <div class="card-dot" style="background:${p.main}"></div>
+        <div class="card-body">
+          <div class="card-name">${f.name}</div>
+          <div class="card-sub">${f.period} · ${f.region}</div>
+        </div>
+        ${ongoing ? '<span class="card-ongoing">진행중</span>' : ''}
+      </div>`;
+    }).join('');
+    scroll.querySelectorAll('.card').forEach((el, i) => {
+      const f = sorted[i];
+      el.addEventListener('click', () => {
+        map.flyTo([f.lat, f.lng], 13, {duration: 0.8});
+        document.getElementById('list-panel').classList.remove('open');
+        setTimeout(() => {
+          const mk = markers.find(m => m.getLatLng().lat === f.lat && m.getLatLng().lng === f.lng);
+          if (mk) { closeAll(); mk.openPopup(); }
+        }, 900);
+      });
+    });
+  }
+
   function render(filter) {
     markers.forEach(m => map.removeLayer(m));
     markers = []; ongoingMarkers = [];
@@ -453,55 +502,6 @@
     const ongoingList = data.filter(f => isOngoing(f));
 
     document.getElementById('cnt-badge').textContent = `전국 ${data.length}개 축제`;
-
-    function makePopup(f, ongoing) {
-      const c = catColor[f.cat] || "#888780";
-      const e = catEmoji[f.cat] || "🎪";
-      const kakaoUrl = `https://map.kakao.com/link/to/${encodeURIComponent(f.name)},${f.lat},${f.lng}`;
-      const ongoingBadge = ongoing ? `<span class="pop-ongoing">🟢 진행중</span>` : '';
-      return `<div class="pop-wrap">
-        <div class="pop-header">
-          <span class="pop-badge" style="background:${c}18;color:${c};border:1px solid ${c}44">${e} ${f.cat}</span>
-          ${ongoingBadge}
-        </div>
-        <div class="pop-name">${f.name}</div>
-        <div class="pop-row">📅 <b>${f.period}</b></div>
-        <div class="pop-row">📍 ${f.place}</div>
-        <div class="pop-row" style="margin-top:2px;font-size:11px;color:#aaa">${f.region}</div>
-        <a class="pop-kakao" href="${kakaoUrl}" target="_blank">🗺 카카오맵으로 길찾기</a>
-      </div>`;
-    }
-
-    function renderCards(data) {
-      const scroll = document.getElementById('list-scroll');
-      document.getElementById('list-cnt').textContent = `${data.length}개`;
-      const sorted = [...data].sort((a,b) => isOngoing(b) - isOngoing(a));
-      scroll.innerHTML = sorted.map((f,i) => {
-        const p = pastel[f.cat] || pastel["기타"];
-        const ongoing = isOngoing(f);
-        return `<div class="card" data-idx="${i}" data-lat="${f.lat}" data-lng="${f.lng}">
-          <div class="card-dot" style="background:${p.main}"></div>
-          <div class="card-body">
-            <div class="card-name">${f.name}</div>
-            <div class="card-sub">${f.period} · ${f.region}</div>
-          </div>
-          ${ongoing ? '<span class="card-ongoing">진행중</span>' : ''}
-        </div>`;
-      }).join('');
-      scroll.querySelectorAll('.card').forEach((el, i) => {
-        const f = sorted[i];
-        el.addEventListener('click', () => {
-          map.flyTo([f.lat, f.lng], 13, {duration: 0.8});
-          document.getElementById('list-panel').classList.remove('open');
-          setTimeout(() => {
-            const mk = markers.find(m => m.getLatLng().lat === f.lat && m.getLatLng().lng === f.lng);
-            if (mk) { closeAll(); mk.openPopup(); }
-          }, 900);
-        });
-      });
-    }
-
-    function closeAll() { markers.forEach(m => m.closePopup()); }
 
     // 일반 마커
     data.filter(f => !isOngoing(f)).forEach(f => {
