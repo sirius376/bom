@@ -299,23 +299,22 @@
       if (now >= s && now <= e) {
         label = diffEnd === 0 ? '오늘 마지막' : `진행중 · ${diffEnd}일 남음`;
         cls = 'high'; arrow = '●';
+        return {name: f.name, label, cls, arrow, days: diffEnd};
       } else if (diffStart > 0) {
         label = `D-${diffStart}`;
         cls = diffStart <= 7 ? 'mid' : 'low';
         arrow = '▷';
+        return {name: f.name, label, cls, arrow, days: diffStart};
       } else {
         return null;
       }
-      return {name: f.name, label, cls, arrow};
     }).filter(Boolean);
 
     items.sort((a, b) => {
-      // 진행중 먼저
-      if (a.cls === 'high' && b.cls !== 'high') return -1;
-      if (a.cls !== 'high' && b.cls === 'high') return 1;
-      // 둘 다 D-day면 임박 순 (mid 먼저, 그 다음 low)
-      const order = {'high':0,'mid':1,'low':2};
-      return order[a.cls] - order[b.cls];
+      if (a.cls !== b.cls) {
+        return {'high':0,'mid':1,'low':2}[a.cls] - {'high':0,'mid':1,'low':2}[b.cls];
+      }
+      return a.days - b.days;
     });
 
     const inner = document.getElementById('ticker-inner');
