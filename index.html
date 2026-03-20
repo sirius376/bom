@@ -534,41 +534,7 @@
     renderCards(data);
   }
 
-  // 진행중 배지 클릭 → 진행중만 필터링 토글
-  let ongoingFilterActive = false;
-  document.getElementById('ongoing-bar').addEventListener('click', () => {
-    ongoingFilterActive = !ongoingFilterActive;
-    const bar = document.getElementById('ongoing-bar');
-    if (ongoingFilterActive) {
-      bar.style.background = '#2ECC71';
-      bar.style.color = 'white';
-      bar.style.borderColor = '#2ECC71';
-      // 진행중만 보이도록 — 현재 필터와 무관하게 전체 축제 기준
-      const allOngoing = festivals.filter(f => isOngoing(f));
-      markers.forEach(m => map.removeLayer(m));
-      markers.length = 0; ongoingMarkers.length = 0;
-      allOngoing.forEach((f, idx) => {
-        const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, true), zIndexOffset: 1000})
-          .bindPopup(makePopup(f, true), {maxWidth:240, closeButton:true, autoClose:false, closeOnClick:false})
-          .addTo(map);
-        m.on('click', () => { markers.forEach(mk => mk.closePopup()); setTimeout(() => m.openPopup(), 10); });
-        markers.push(m); ongoingMarkers.push(m);
-      });
-      document.getElementById('cnt-badge').textContent = `진행중 ${allOngoing.length}개`;
-      renderCards(allOngoing);
-      map.flyTo([36.2, 127.9], 7, { duration: 0.8 });
-    } else {
-      bar.style.background = '';
-      bar.style.color = '';
-      bar.style.borderColor = '';
-      // 현재 활성 필터로 복원
-      const activeBtn = document.querySelector('.f-btn.active');
-      render(activeBtn ? activeBtn.dataset.cat : '전체');
-    }
-  });
-
   renderTicker();
-  document.getElementById('ticker-inner').style.animationDuration = `${Math.max(8, festivals.length * 0.7)}s`;
 
   document.getElementById('list-btn').addEventListener('click', () => {
     document.getElementById('list-panel').classList.toggle('open');
@@ -582,27 +548,58 @@
 
   render("전체");
 
-  // 진행중 배지는 필터와 무관하게 항상 전체 진행중 개수 표시
-  function updateOngoingBar() {
-    const allOngoing = festivals.filter(f => isOngoing(f));
-    const bar = document.getElementById('ongoing-bar');
-    const cnt = document.getElementById('ongoing-cnt');
-    if (allOngoing.length > 0) {
-      bar.style.display = 'block';
-      cnt.textContent = allOngoing.length;
-    } else {
-      bar.style.display = 'none';
-    }
+  // 진행중 배지 — 항상 전체 기준 진행중 개수 표시
+  const allOngoing = festivals.filter(f => isOngoing(f));
+  const ongoingBarEl = document.getElementById('ongoing-bar');
+  if (allOngoing.length > 0) {
+    ongoingBarEl.style.display = 'block';
+    document.getElementById('ongoing-cnt').textContent = allOngoing.length;
+  } else {
+    ongoingBarEl.style.display = 'none';
   }
-  updateOngoingBar();
+
+  // 티커 속도 — 4배 빠르게
+  const tickerEl = document.getElementById('ticker-inner');
+  tickerEl.style.animationDuration = `${Math.max(5, Math.round(allOngoing.length * 0.35 + festivals.length * 0.15))}s`;
+
+  // 진행중 배지 클릭 → 진행중 축제만 보이기 토글
+  let ongoingFilterActive = false;
+  ongoingBarEl.addEventListener('click', () => {
+    ongoingFilterActive = !ongoingFilterActive;
+    if (ongoingFilterActive) {
+      ongoingBarEl.style.background = '#2ECC71';
+      ongoingBarEl.style.color = 'white';
+      ongoingBarEl.style.borderColor = '#2ECC71';
+      // 현재 마커 전부 제거 후 진행중만 추가
+      markers.forEach(m => map.removeLayer(m));
+      markers.length = 0; ongoingMarkers.length = 0;
+      allOngoing.forEach(f => {
+        const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, true), zIndexOffset: 1000})
+          .bindPopup(makePopup(f, true), {maxWidth:240, closeButton:true, autoClose:false, closeOnClick:false})
+          .addTo(map);
+        m.on('click', () => { markers.forEach(mk => mk.closePopup()); setTimeout(() => m.openPopup(), 10); });
+        markers.push(m); ongoingMarkers.push(m);
+      });
+      document.getElementById('cnt-badge').textContent = `진행중 ${allOngoing.length}개`;
+      renderCards(allOngoing);
+      map.flyTo([36.2, 127.9], 7, { duration: 0.8 });
+    } else {
+      ongoingBarEl.style.background = '';
+      ongoingBarEl.style.color = '';
+      ongoingBarEl.style.borderColor = '';
+      const activeBtn = document.querySelector('.f-btn.active');
+      render(activeBtn ? activeBtn.dataset.cat : '전체');
+    }
+  });
 
   document.getElementById('filter-bar').addEventListener('click', e => {
     const btn = e.target.closest('.f-btn');
     if (!btn) return;
     // 진행중 토글 해제
     ongoingFilterActive = false;
-    const bar = document.getElementById('ongoing-bar');
-    bar.style.background = ''; bar.style.color = ''; bar.style.borderColor = '';
+    ongoingBarEl.style.background = '';
+    ongoingBarEl.style.color = '';
+    ongoingBarEl.style.borderColor = '';
     document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     render(btn.dataset.cat);
