@@ -270,13 +270,14 @@
     const p = pastel[cat] || pastel["기타"];
     const size = ongoing ? 44 : 34;
     const cx = size / 2;
-    const r = cx - 3;
-    // 구슬 입체감: 방사형 그라데이션 id를 고유하게
     const gid = `g_${cat.charCodeAt(0)}_${ongoing?1:0}`;
     const sid = `s_${cat.charCodeAt(0)}_${ongoing?1:0}`;
-    // 진행중 내부 점 색상 (초록)
-    const dotColor = ongoing ? "#2ECC71" : p.hi;
+
+    // 진행중: 내부 점이 초록으로 CSS 애니메이션 (빠른 깜빡임 없음, 항상 부드럽게만)
+    const dotFill = ongoing ? "#2ECC71" : "white";
+    const dotOpacity = ongoing ? "0.95" : "0.88";
     const dotClass = ongoing ? 'class="marker-dot-ongoing"' : '';
+    const dotR = ongoing ? 6 : 5;
 
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
       <defs>
@@ -286,13 +287,13 @@
           <stop offset="100%" stop-color="${p.sh}"/>
         </radialGradient>
         <radialGradient id="${sid}" cx="35%" cy="30%" r="50%">
-          <stop offset="0%" stop-color="white" stop-opacity="0.75"/>
+          <stop offset="0%" stop-color="white" stop-opacity="0.7"/>
           <stop offset="100%" stop-color="white" stop-opacity="0"/>
         </radialGradient>
       </defs>
-      <circle cx="${cx}" cy="${cx}" r="${r}" fill="url(#${gid})"/>
-      <circle cx="${cx}" cy="${cx}" r="${r}" fill="url(#${sid})"/>
-      <circle cx="${cx}" cy="${cx}" r="${ongoing ? 6 : 4.5}" fill="${dotColor}" opacity="0.95" ${dotClass}/>
+      <circle cx="${cx}" cy="${cx}" r="${cx - 2}" fill="url(#${gid})"/>
+      <circle cx="${cx}" cy="${cx}" r="${cx - 2}" fill="url(#${sid})"/>
+      <circle cx="${cx}" cy="${cx}" r="${dotR}" fill="${dotFill}" opacity="${dotOpacity}" ${dotClass}/>
     </svg>`;
 
     return L.divIcon({
@@ -377,31 +378,11 @@
     });
   }
 
-  // 진행중 배지 클릭 → 지도 축소 후 내부 점만 빠르게 반짝임
+  // 진행중 배지 클릭 → 지도 전국 뷰로 축소
   document.getElementById('ongoing-bar').addEventListener('click', () => {
     if (ongoingMarkers.length === 0) return;
     map.closePopup();
     map.flyTo([36.2, 127.9], 7, { duration: 1.0 });
-    setTimeout(() => {
-      ongoingMarkers.forEach(m => {
-        const el = m.getElement();
-        if (!el) return;
-        const dot = el.querySelector('.marker-dot-ongoing');
-        if (!dot) return;
-        // 잠깐 빠른 깜빡임 후 다시 일반 애니메이션으로
-        dot.style.animation = 'none';
-        let count = 0;
-        const interval = setInterval(() => {
-          dot.style.opacity = count % 2 === 0 ? '0.1' : '1';
-          count++;
-          if (count >= 10) {
-            clearInterval(interval);
-            dot.style.opacity = '1';
-            dot.style.animation = 'dotPulse 2s ease-in-out infinite';
-          }
-        }, 120);
-      });
-    }, 1100);
   });
 
   render("전체");
