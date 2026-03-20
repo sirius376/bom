@@ -299,12 +299,12 @@
       if (now >= s && now <= e) {
         label = diffEnd === 0 ? '오늘 마지막' : `진행중 · ${diffEnd}일 남음`;
         cls = 'high'; arrow = '●';
-        return {name: f.name, label, cls, arrow, days: diffEnd};
+        return {name: f.name, label, cls, arrow, days: diffEnd, lat: f.lat, lng: f.lng};
       } else if (diffStart > 0) {
         label = `D-${diffStart}`;
         cls = diffStart <= 7 ? 'mid' : 'low';
         arrow = '▷';
-        return {name: f.name, label, cls, arrow, days: diffStart};
+        return {name: f.name, label, cls, arrow, days: diffStart, lat: f.lat, lng: f.lng};
       } else {
         return null;
       }
@@ -318,13 +318,30 @@
     });
 
     const inner = document.getElementById('ticker-inner');
-    // 3벌 복제로 seamless 루프 보장
+    // 3벌 복제로 seamless 루프 보장, lat/lng/ongoing 데이터 심기
     inner.innerHTML = [...items, ...items, ...items].map(b =>
-      `<div class="ticker-item">
+      `<div class="ticker-item" data-lat="${b.lat}" data-lng="${b.lng}" data-ongoing="${b.cls === 'high'}" style="cursor:pointer">
         <span class="t-name">${b.name}</span>
         <span class="t-pct ${b.cls}"><span class="ticker-arrow">${b.arrow}</span>${b.label}</span>
       </div>`
     ).join('');
+
+    // 티커 아이템 클릭 → 해당 위치로 이동 후 팝업 열기
+    inner.querySelectorAll('.ticker-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const lat = parseFloat(el.dataset.lat);
+        const lng = parseFloat(el.dataset.lng);
+        const isOngoingItem = el.dataset.ongoing === 'true';
+        map.flyTo([lat, lng], 13, { duration: 0.8 });
+        setTimeout(() => {
+          const mk = markers.find(m => {
+            const ll = m.getLatLng();
+            return Math.abs(ll.lat - lat) < 0.0001 && Math.abs(ll.lng - lng) < 0.0001;
+          });
+          if (mk) { closeAll(); mk.openPopup(); }
+        }, 900);
+      });
+    });
 
     // CSS animation 완전 제거, JS RAF로 대체
     inner.style.animation = 'none';
