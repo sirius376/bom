@@ -140,6 +140,57 @@
     .pop-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.4; }
     .pop-row { font-size: 12px; color: var(--text-sub); line-height: 1.8; }
     .pop-row b { color: var(--text); font-weight: 500; }
+    .pop-kakao {
+      display: block; width: 100%; margin-top: 10px;
+      padding: 8px 0; border-radius: 8px;
+      background: #FEE500; color: #3A1D1D;
+      font-size: 12px; font-weight: 700; text-align: center;
+      text-decoration: none; font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    /* 카드 리스트 패널 */
+    #list-panel {
+      position: fixed; bottom: 60px; left: 0; right: 0; z-index: 900;
+      background: var(--white); border-top: 1px solid var(--border);
+      border-radius: 18px 18px 0 0;
+      transform: translateY(100%);
+      transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+      max-height: 60vh; display: flex; flex-direction: column;
+    }
+    #list-panel.open { transform: translateY(0); }
+    #list-handle {
+      flex-shrink: 0; padding: 10px 16px 6px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    #list-handle span { font-size: 13px; font-weight: 700; color: var(--text); }
+    #list-close {
+      font-size: 18px; color: #bbb; cursor: pointer;
+      background: none; border: none; padding: 0; line-height: 1;
+    }
+    #list-scroll { flex: 1; overflow-y: auto; padding: 10px 12px 16px; scrollbar-width: none; }
+    #list-scroll::-webkit-scrollbar { display: none; }
+    .card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 11px 13px; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 11px; cursor: pointer;
+    }
+    .card:active { opacity: 0.75; }
+    .card-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .card-body { flex: 1; min-width: 0; }
+    .card-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-sub { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+    .card-ongoing { font-size: 10px; font-weight: 700; color: var(--green-dark); background: var(--green-light); border-radius: 6px; padding: 1px 6px; flex-shrink: 0; }
+
+    /* 리스트 토글 버튼 */
+    #list-btn {
+      position: absolute; bottom: 68px; right: 12px; z-index: 950;
+      background: white; border: 1px solid var(--border);
+      border-radius: 20px; padding: 7px 13px;
+      font-size: 12px; font-weight: 600; color: var(--text);
+      cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-family: 'Noto Sans KR', sans-serif;
+    }
   </style>
 </head>
 <body>
@@ -166,15 +217,25 @@
 
   <div id="ongoing-bar"><b id="ongoing-cnt">0</b>개 축제 진행중 🌸</div>
 
+  <button id="list-btn">☰ 목록</button>
+
+  <div id="list-panel">
+    <div id="list-handle">
+      <span id="list-title">축제 목록 <span id="list-cnt" style="font-weight:400;color:var(--text-sub);font-size:12px"></span></span>
+      <button id="list-close">×</button>
+    </div>
+    <div id="list-scroll" id="list-scroll"></div>
+  </div>
+
   <div id="filter-bar">
     <button class="f-btn active" data-cat="전체">전체</button>
-    <button class="f-btn" data-cat="벚꽃"   style="--c:#F07070">🌸 벚꽃</button>
+    <button class="f-btn" data-cat="벚꽃"   style="--c:#F07070">벚꽃</button>
     <button class="f-btn" data-cat="진달래" style="--c:#72B84E">진달래</button>
-    <button class="f-btn" data-cat="유채꽃" style="--c:#F0AA30">🌼 유채꽃</button>
+    <button class="f-btn" data-cat="유채꽃" style="--c:#F0AA30">유채꽃</button>
     <button class="f-btn" data-cat="산수유" style="--c:#38B07A">산수유</button>
     <button class="f-btn" data-cat="매화"   style="--c:#A870C8">매화</button>
-    <button class="f-btn" data-cat="장미"   style="--c:#E8609A">🌹 장미</button>
-    <button class="f-btn" data-cat="튤립"   style="--c:#6888E8">🌷 튤립</button>
+    <button class="f-btn" data-cat="장미"   style="--c:#E8609A">장미</button>
+    <button class="f-btn" data-cat="튤립"   style="--c:#6888E8">튤립</button>
     <button class="f-btn" data-cat="수선화" style="--c:#40A8D0">수선화</button>
     <button class="f-btn" data-cat="철쭉"   style="--c:#A870B8">철쭉</button>
     <button class="f-btn" data-cat="기타"   style="--c:#909088">기타</button>
@@ -328,23 +389,59 @@
       document.getElementById('today-badge').style.display = 'none';
     }
 
-    function closeAll() { markers.forEach(m => m.closePopup()); }
-
-    // 일반 마커
-    data.filter(f => !isOngoing(f)).forEach(f => {
+    function makePopup(f, ongoing) {
       const c = catColor[f.cat] || "#888780";
       const e = catEmoji[f.cat] || "🎪";
-      const popup = `<div class="pop-wrap">
+      const kakaoUrl = `https://map.kakao.com/link/to/${encodeURIComponent(f.name)},${f.lat},${f.lng}`;
+      const ongoingBadge = ongoing ? `<span class="pop-ongoing">🟢 진행중</span>` : '';
+      return `<div class="pop-wrap">
         <div class="pop-header">
           <span class="pop-badge" style="background:${c}18;color:${c};border:1px solid ${c}44">${e} ${f.cat}</span>
+          ${ongoingBadge}
         </div>
         <div class="pop-name">${f.name}</div>
         <div class="pop-row">📅 <b>${f.period}</b></div>
         <div class="pop-row">📍 ${f.place}</div>
         <div class="pop-row" style="margin-top:2px;font-size:11px;color:#aaa">${f.region}</div>
+        <a class="pop-kakao" href="${kakaoUrl}" target="_blank">🗺 카카오맵으로 길찾기</a>
       </div>`;
+    }
+
+    function renderCards(data) {
+      const scroll = document.getElementById('list-scroll');
+      document.getElementById('list-cnt').textContent = `${data.length}개`;
+      const sorted = [...data].sort((a,b) => isOngoing(b) - isOngoing(a));
+      scroll.innerHTML = sorted.map((f,i) => {
+        const p = pastel[f.cat] || pastel["기타"];
+        const ongoing = isOngoing(f);
+        return `<div class="card" data-idx="${i}" data-lat="${f.lat}" data-lng="${f.lng}">
+          <div class="card-dot" style="background:${p.main}"></div>
+          <div class="card-body">
+            <div class="card-name">${f.name}</div>
+            <div class="card-sub">${f.period} · ${f.region}</div>
+          </div>
+          ${ongoing ? '<span class="card-ongoing">진행중</span>' : ''}
+        </div>`;
+      }).join('');
+      scroll.querySelectorAll('.card').forEach((el, i) => {
+        const f = sorted[i];
+        el.addEventListener('click', () => {
+          map.flyTo([f.lat, f.lng], 13, {duration: 0.8});
+          document.getElementById('list-panel').classList.remove('open');
+          setTimeout(() => {
+            const mk = markers.find(m => m.getLatLng().lat === f.lat && m.getLatLng().lng === f.lng);
+            if (mk) { closeAll(); mk.openPopup(); }
+          }, 900);
+        });
+      });
+    }
+
+    function closeAll() { markers.forEach(m => m.closePopup()); }
+
+    // 일반 마커
+    data.filter(f => !isOngoing(f)).forEach(f => {
       const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, false)})
-        .bindPopup(popup, {maxWidth:240, closeButton:true})
+        .bindPopup(makePopup(f, false), {maxWidth:240, closeButton:true})
         .addTo(map);
       m.on('click', () => { closeAll(); setTimeout(() => m.openPopup(), 10); });
       markers.push(m);
@@ -352,26 +449,16 @@
 
     // 진행중 마커
     ongoingList.forEach((f, idx) => {
-      const c = catColor[f.cat] || "#888780";
-      const e = catEmoji[f.cat] || "🎪";
-      const popup = `<div class="pop-wrap">
-        <div class="pop-header">
-          <span class="pop-badge" style="background:${c}18;color:${c};border:1px solid ${c}44">${e} ${f.cat}</span>
-          <span class="pop-ongoing">🟢 진행중</span>
-        </div>
-        <div class="pop-name">${f.name}</div>
-        <div class="pop-row">📅 <b>${f.period}</b></div>
-        <div class="pop-row">📍 ${f.place}</div>
-        <div class="pop-row" style="margin-top:2px;font-size:11px;color:#aaa">${f.region}</div>
-      </div>`;
       const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, true), zIndexOffset: 1000})
-        .bindPopup(popup, {maxWidth:240, closeButton:true, autoClose:false, closeOnClick:false})
+        .bindPopup(makePopup(f, true), {maxWidth:240, closeButton:true, autoClose:false, closeOnClick:false})
         .addTo(map);
       m.on('click', () => { closeAll(); setTimeout(() => m.openPopup(), 10); });
       if (idx === 0) setTimeout(() => m.openPopup(), 600);
       markers.push(m);
       ongoingMarkers.push(m);
     });
+
+    renderCards(data);
   }
 
   // 진행중 배지 클릭 → 지도 전국 뷰로 축소
@@ -379,6 +466,16 @@
     if (ongoingMarkers.length === 0) return;
     map.closePopup();
     map.flyTo([36.2, 127.9], 7, { duration: 1.0 });
+  });
+
+  document.getElementById('list-btn').addEventListener('click', () => {
+    document.getElementById('list-panel').classList.toggle('open');
+  });
+  document.getElementById('list-close').addEventListener('click', () => {
+    document.getElementById('list-panel').classList.remove('open');
+  });
+  map.on('click', () => {
+    document.getElementById('list-panel').classList.remove('open');
   });
 
   render("전체");
