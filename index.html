@@ -454,14 +454,6 @@
 
     document.getElementById('cnt-badge').textContent = `전국 ${data.length}개 축제`;
 
-    // 진행중 배지
-    if (ongoingList.length > 0) {
-      document.getElementById('ongoing-bar').style.display = 'block';
-      document.getElementById('ongoing-cnt').textContent = ongoingList.length;
-    } else {
-      document.getElementById('ongoing-bar').style.display = 'none';
-    }
-
     function makePopup(f, ongoing) {
       const c = catColor[f.cat] || "#888780";
       const e = catEmoji[f.cat] || "🎪";
@@ -558,9 +550,8 @@
     ongoingBarEl.style.display = 'none';
   }
 
-  // 티커 속도 — 4배 빠르게
-  const tickerEl = document.getElementById('ticker-inner');
-  tickerEl.style.animationDuration = `${Math.max(5, Math.round(allOngoing.length * 0.35 + festivals.length * 0.15))}s`;
+  // 티커 속도 — 빠르게 고정
+  document.getElementById('ticker-inner').style.animationDuration = '12s';
 
   // 진행중 배지 클릭 → 진행중 축제만 보이기 토글
   let ongoingFilterActive = false;
