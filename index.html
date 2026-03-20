@@ -213,6 +213,9 @@
     .card-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .card-sub { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
     .card-ongoing { font-size: 10px; font-weight: 700; color: var(--green-dark); background: var(--green-light); border-radius: 6px; padding: 1px 6px; flex-shrink: 0; }
+    .card-dday { font-size: 10px; font-weight: 700; border-radius: 6px; padding: 1px 6px; flex-shrink: 0; }
+    .card-dday.mid { color: #B87010; background: #FDF0C4; }
+    .card-dday.low { color: #888; background: #F0F0EE; }
 
     /* 리스트 토글 버튼 */
     #list-btn {
@@ -511,17 +514,37 @@
   function renderCards(data) {
     const scroll = document.getElementById('list-scroll');
     document.getElementById('list-cnt').textContent = `${data.length}개`;
-    const sorted = [...data].sort((a,b) => isOngoing(b) - isOngoing(a));
+    const now = new Date(); now.setHours(0,0,0,0);
+    const sorted = [...data].sort((a,b) => {
+      const ao = isOngoing(a), bo = isOngoing(b);
+      if (ao !== bo) return bo - ao;
+      const as = new Date(a.start), bs = new Date(b.start);
+      return as - bs;
+    });
     scroll.innerHTML = sorted.map((f,i) => {
       const p = pastel[f.cat] || pastel["기타"];
       const ongoing = isOngoing(f);
+      const s = new Date(f.start); s.setHours(0,0,0,0);
+      const e = new Date(f.end);   e.setHours(0,0,0,0);
+      const diffStart = Math.round((s - now) / 86400000);
+      const diffEnd   = Math.round((e - now) / 86400000);
+
+      let badge = '';
+      if (ongoing) {
+        const remain = diffEnd === 0 ? '오늘 마지막' : `${diffEnd}일 남음`;
+        badge = `<span class="card-ongoing">● ${remain}</span>`;
+      } else if (diffStart > 0) {
+        const cls = diffStart <= 7 ? 'mid' : 'low';
+        badge = `<span class="card-dday ${cls}">D-${diffStart}</span>`;
+      }
+
       return `<div class="card" data-idx="${i}" data-lat="${f.lat}" data-lng="${f.lng}">
         <div class="card-dot" style="background:${p.main}"></div>
         <div class="card-body">
           <div class="card-name">${f.name}</div>
           <div class="card-sub">${f.period} · ${f.region}</div>
         </div>
-        ${ongoing ? '<span class="card-ongoing">진행중</span>' : ''}
+        ${badge}
       </div>`;
     }).join('');
     scroll.querySelectorAll('.card').forEach((el, i) => {
