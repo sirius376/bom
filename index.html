@@ -79,27 +79,19 @@
       flex: 1; overflow: hidden; position: relative;
     }
     #ticker-inner {
-      display: flex; gap: 0;
-      white-space: nowrap;
-      animation: tickerScroll 38s linear infinite;
+      display: inline-flex; white-space: nowrap; will-change: transform;
     }
     .ticker-item {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 0 18px; font-size: 11px; color: #eee;
-      border-right: 1px solid #333; height: 24px;
+      border-right: 1px solid #333; height: 24px; flex-shrink: 0;
     }
     .ticker-item .t-name { color: #ccc; }
-    .ticker-item .t-pct {
-      font-weight: 700;
-    }
+    .ticker-item .t-pct { font-weight: 700; }
     .ticker-item .t-pct.high { color: #2ECC71; }
     .ticker-item .t-pct.mid  { color: #F0AA30; }
     .ticker-item .t-pct.low  { color: #aaa; }
     .ticker-arrow { font-size: 9px; margin-right: 1px; }
-    @keyframes tickerScroll {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
 
     #filter-bar {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
@@ -305,7 +297,6 @@
       const diffEnd   = Math.round((e - now) / 86400000);
       let label, cls, arrow;
       if (now >= s && now <= e) {
-        const elapsed = Math.round((now - s) / 86400000);
         label = diffEnd === 0 ? '오늘 마지막' : `진행중 · ${diffEnd}일 남음`;
         cls = 'high'; arrow = '●';
       } else if (diffStart > 0) {
@@ -320,14 +311,30 @@
 
     items.sort((a,b) => ({'high':0,'mid':1,'low':2}[a.cls] - {'high':0,'mid':1,'low':2}[b.cls]));
 
-    const doubled = [...items, ...items];
-    document.getElementById('ticker-inner').innerHTML = doubled.map(b =>
+    const inner = document.getElementById('ticker-inner');
+    // 3벌 복제로 seamless 루프 보장
+    inner.innerHTML = [...items, ...items, ...items].map(b =>
       `<div class="ticker-item">
         <span class="t-name">${b.name}</span>
         <span class="t-pct ${b.cls}"><span class="ticker-arrow">${b.arrow}</span>${b.label}</span>
       </div>`
     ).join('');
-    document.getElementById('ticker-inner').style.animationDuration = `${Math.max(10, items.length * 1.5)}s`;
+
+    // CSS animation 완전 제거, JS RAF로 대체
+    inner.style.animation = 'none';
+    const speed = 0.7;
+    let pos = 0;
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const oneSetW = inner.scrollWidth / 3;
+      function tick() {
+        pos += speed;
+        if (pos >= oneSetW) pos -= oneSetW;
+        inner.style.transform = `translateX(${-pos}px)`;
+        requestAnimationFrame(tick);
+      }
+      tick();
+    }));
   }
   // ────────────────────────────────────────────────────────────
 
@@ -550,9 +557,6 @@
   map.on('click', () => {
     document.getElementById('list-panel').classList.remove('open');
   });
-
-  // 티커 속도
-  document.getElementById('ticker-inner').style.animationDuration = '12s';
 
   // 최초 렌더
   render("전체");
