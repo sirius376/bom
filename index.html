@@ -47,7 +47,14 @@
     }
     #header .logo { font-size: 17px; font-weight: 700; color: var(--pink); letter-spacing: -0.3px; }
     #header .logo span { color: var(--text); }
-    #header .right-wrap { display: flex; align-items: center; gap: 8px; }
+    #header .right-wrap { display: flex; align-items: center; gap: 10px; }
+    #mail-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--bg); border: 1px solid var(--border);
+      text-decoration: none; transition: background 0.15s;
+    }
+    #mail-btn:hover { background: #f0f0f0; }
     #header .count-badge {
       font-size: 12px; background: var(--pink-light); color: var(--pink-dark);
       padding: 4px 10px; border-radius: 20px; font-weight: 500;
@@ -231,6 +238,12 @@
   <div id="header">
     <div class="logo">🌸 <span>봄꽃</span></div>
     <div class="right-wrap">
+      <a href="mailto:moon-in@kakao.com" id="mail-btn" title="문의하기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <path d="M2 7l10 7 10-7"/>
+        </svg>
+      </a>
       <div class="count-badge" id="cnt-badge">전국 50개 축제</div>
     </div>
   </div>
