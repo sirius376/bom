@@ -53,7 +53,46 @@
       padding: 4px 10px; border-radius: 20px; font-weight: 500;
     }
 
-    #map { position: fixed; top: 52px; bottom: 60px; left: 0; right: 0; z-index: 1; }
+    #map { position: fixed; top: 76px; bottom: 60px; left: 0; right: 0; z-index: 1; }
+
+    /* 개화율 티커 */
+    #ticker {
+      position: fixed; top: 52px; left: 0; right: 0; z-index: 999;
+      height: 24px; background: #1A1A1A;
+      display: flex; align-items: center; overflow: hidden;
+    }
+    #ticker-label {
+      flex-shrink: 0; padding: 0 10px;
+      font-size: 10px; font-weight: 700; color: #FF6B6B;
+      letter-spacing: 0.3px; border-right: 1px solid #333;
+      height: 100%; display: flex; align-items: center;
+      background: #111;
+    }
+    #ticker-track {
+      flex: 1; overflow: hidden; position: relative;
+    }
+    #ticker-inner {
+      display: flex; gap: 0;
+      white-space: nowrap;
+      animation: tickerScroll 38s linear infinite;
+    }
+    .ticker-item {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 0 18px; font-size: 11px; color: #eee;
+      border-right: 1px solid #333; height: 24px;
+    }
+    .ticker-item .t-name { color: #ccc; }
+    .ticker-item .t-pct {
+      font-weight: 700;
+    }
+    .ticker-item .t-pct.high { color: #2ECC71; }
+    .ticker-item .t-pct.mid  { color: #F0AA30; }
+    .ticker-item .t-pct.low  { color: #aaa; }
+    .ticker-arrow { font-size: 9px; margin-right: 1px; }
+    @keyframes tickerScroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
 
     #filter-bar {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
@@ -198,6 +237,13 @@
 
   <div id="map"></div>
 
+  <div id="ticker">
+    <div id="ticker-label">🌸 개화율</div>
+    <div id="ticker-track">
+      <div id="ticker-inner"></div>
+    </div>
+  </div>
+
   <div id="legend">
     <div class="leg-row"><div class="leg-dot" style="background:#F07070"></div>벚꽃</div>
     <div class="leg-row"><div class="leg-dot" style="background:#72B84E"></div>진달래</div>
@@ -222,20 +268,54 @@
 
   <div id="filter-bar">
     <button class="f-btn active" data-cat="전체">전체</button>
-    <button class="f-btn" data-cat="벚꽃"   style="--c:#F07070">벚꽃</button>
-    <button class="f-btn" data-cat="진달래" style="--c:#72B84E">진달래</button>
-    <button class="f-btn" data-cat="유채꽃" style="--c:#F0AA30">유채꽃</button>
-    <button class="f-btn" data-cat="산수유" style="--c:#38B07A">산수유</button>
-    <button class="f-btn" data-cat="매화"   style="--c:#A870C8">매화</button>
-    <button class="f-btn" data-cat="장미"   style="--c:#E8609A">장미</button>
-    <button class="f-btn" data-cat="튤립"   style="--c:#6888E8">튤립</button>
-    <button class="f-btn" data-cat="수선화" style="--c:#40A8D0">수선화</button>
-    <button class="f-btn" data-cat="철쭉"   style="--c:#A870B8">철쭉</button>
-    <button class="f-btn" data-cat="기타"   style="--c:#909088">기타</button>
+    <button class="f-btn" data-cat="벚꽃"   style="--c:#F07070">🌸 벚꽃</button>
+    <button class="f-btn" data-cat="진달래" style="--c:#72B84E">🌺 진달래</button>
+    <button class="f-btn" data-cat="유채꽃" style="--c:#F0AA30">🌼 유채꽃</button>
+    <button class="f-btn" data-cat="산수유" style="--c:#38B07A">🌿 산수유</button>
+    <button class="f-btn" data-cat="매화"   style="--c:#A870C8">🌸 매화</button>
+    <button class="f-btn" data-cat="장미"   style="--c:#E8609A">🌹 장미</button>
+    <button class="f-btn" data-cat="튤립"   style="--c:#6888E8">🌷 튤립</button>
+    <button class="f-btn" data-cat="수선화" style="--c:#40A8D0">💐 수선화</button>
+    <button class="f-btn" data-cat="철쭉"   style="--c:#A870B8">🌸 철쭉</button>
+    <button class="f-btn" data-cat="기타"   style="--c:#909088">🎪 기타</button>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+  // ─── 개화율 데이터 (수동 업데이트) ───────────────────────────
+  const bloomRates = [
+    {name:"진해 군항제",     pct:80},
+    {name:"여의도 벚꽃축제", pct:15},
+    {name:"석촌호수 벚꽃",   pct:10},
+    {name:"경포 벚꽃축제",   pct:5},
+    {name:"전농로 왕벚꽃",   pct:90},
+    {name:"구례 300리 벚꽃", pct:95},
+    {name:"광양매화축제",    pct:100},
+    {name:"에버랜드 튤립",   pct:60},
+    {name:"서산 수선화축제", pct:70},
+    {name:"이천 산수유축제", pct:85},
+    {name:"고려산 진달래",   pct:20},
+    {name:"태안 튤립박람회", pct:40},
+    {name:"영취산 진달래",   pct:75},
+    {name:"천리포 목련축제", pct:55},
+    {name:"선도 수선화축제", pct:65},
+  ];
+
+  function renderTicker() {
+    const inner = document.getElementById('ticker-inner');
+    const items = [...bloomRates, ...bloomRates]; // 무한 루프용 2배 복제
+    inner.innerHTML = items.map(b => {
+      const cls = b.pct >= 70 ? 'high' : b.pct >= 30 ? 'mid' : 'low';
+      const arrow = b.pct >= 70 ? '▲' : b.pct >= 30 ? '▶' : '▽';
+      return `<div class="ticker-item">
+        <span class="t-name">${b.name}</span>
+        <span class="t-pct ${cls}"><span class="ticker-arrow">${arrow}</span>${b.pct}%</span>
+      </div>`;
+    }).join('');
+  }
+  renderTicker();
+  // ────────────────────────────────────────────────────────────
+
   const festivals = [
     {name:"경포벚꽃축제",region:"강원 강릉",period:"4.4 ~ 4.11",place:"경포호수 일원",cat:"벚꽃",lat:37.7928,lng:128.9010,start:"2026-04-04",end:"2026-04-11"},
     {name:"삼척맹방유채꽃축제",region:"강원 삼척",period:"4.3 ~ 4.19",place:"삼척맹방유채꽃축제",cat:"유채꽃",lat:37.3727,lng:129.1660,start:"2026-04-03",end:"2026-04-19"},
