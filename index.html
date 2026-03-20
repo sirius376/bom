@@ -268,22 +268,37 @@
 
   function makeIcon(cat, ongoing) {
     const p = pastel[cat] || pastel["기타"];
-    const size = ongoing ? 44 : 34;
+    const size = ongoing ? 46 : 36;
     const cx = size / 2;
-    const dotFill = ongoing ? "#2ECC71" : "white";
-    const dotR = ongoing ? 6 : 5;
+    const sc = size / 36; // scale factor
     const dotClass = ongoing ? 'class="marker-dot-ongoing"' : '';
+    const dotFill = ongoing ? "#2ECC71" : "white";
+    const dotR = Math.round(3.5 * sc);
+
+    // 꽃잎 4장 — 위아래좌우 타원
+    const px = cx, py = cx;
+    const pr = Math.round(7 * sc);   // 꽃잎 반지름 (긴 쪽)
+    const pw = Math.round(4 * sc);   // 꽃잎 폭 (짧은 쪽)
+    const cr = Math.round(6 * sc);   // 중심 원 반지름
 
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-      <circle cx="${cx}" cy="${cx}" r="${cx - 2}" fill="${p.main}" opacity="0.95"/>
-      <circle cx="${cx}" cy="${cx}" r="${dotR}" fill="${dotFill}" opacity="0.92" ${dotClass}/>
+      <ellipse cx="${px}" cy="${py - pr + pw}" rx="${pw}" ry="${pr}" fill="${p.main}" opacity="0.9"/>
+      <ellipse cx="${px}" cy="${py + pr - pw}" rx="${pw}" ry="${pr}" fill="${p.main}" opacity="0.9"/>
+      <ellipse cx="${px - pr + pw}" cy="${py}" rx="${pr}" ry="${pw}" fill="${p.main}" opacity="0.9"/>
+      <ellipse cx="${px + pr - pw}" cy="${py}" rx="${pr}" ry="${pw}" fill="${p.main}" opacity="0.9"/>
+      <ellipse cx="${px - Math.round(pr*0.6)}" cy="${py - Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(-45 ${px - Math.round(pr*0.6)} ${py - Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.85"/>
+      <ellipse cx="${px + Math.round(pr*0.6)}" cy="${py - Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(45 ${px + Math.round(pr*0.6)} ${py - Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.85"/>
+      <ellipse cx="${px - Math.round(pr*0.6)}" cy="${py + Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(45 ${px - Math.round(pr*0.6)} ${py + Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.85"/>
+      <ellipse cx="${px + Math.round(pr*0.6)}" cy="${py + Math.round(pr*0.6)}" rx="${pw}" ry="${pr}" transform="rotate(-45 ${px + Math.round(pr*0.6)} ${py + Math.round(pr*0.6)})" fill="${p.hi}" opacity="0.85"/>
+      <circle cx="${cx}" cy="${cx}" r="${cr}" fill="${p.sh}" opacity="0.95"/>
+      <circle cx="${cx}" cy="${cx}" r="${dotR + 1}" fill="${dotFill}" opacity="0.92" ${dotClass}/>
     </svg>`;
 
     return L.divIcon({
       html: svg, className: '',
       iconSize: [size, size],
       iconAnchor: [cx, cx],
-      popupAnchor: [0, -(cx + 6)]
+      popupAnchor: [0, -(cx + 8)]
     });
   }
 
