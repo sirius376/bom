@@ -5,15 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>봄꽃 축제 지도 2026 | bomgoat</title>
 
-  <!-- OG Tags (카카오톡 링크 미리보기) -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://bomgoat.com" />
   <meta property="og:title" content="🌸 2026 봄꽃 축제 지도" />
   <meta property="og:description" content="전국 50개 봄꽃 축제를 한눈에! 벚꽃·진달래·유채꽃·튤립 지도로 찾아보세요" />
   <meta property="og:image" content="https://bomgoat.com/og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
-
-  <!-- 카카오톡 미리보기 추가 메타 -->
   <meta name="description" content="전국 50개 봄꽃 축제를 한눈에! 벚꽃·진달래·유채꽃·튤립 지도로 찾아보세요" />
   <meta name="theme-color" content="#FF6B6B" />
 
@@ -28,6 +25,9 @@
       --pink: #FF6B6B;
       --pink-light: #FFE8E8;
       --pink-dark: #D94F4F;
+      --green: #2ECC71;
+      --green-light: #E8FBF0;
+      --green-dark: #1A9E52;
       --text: #1A1A1A;
       --text-sub: #666;
       --bg: #FFFAF9;
@@ -36,154 +36,109 @@
       --radius: 16px;
     }
 
-    html, body {
-      height: 100%;
-      font-family: 'Noto Sans KR', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow: hidden;
-    }
+    html, body { height: 100%; font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
 
-    /* 상단 헤더 */
     #header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 1000;
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: var(--white); border-bottom: 1px solid var(--border);
       padding: 12px 16px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
     }
-
-    #header .logo {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--pink);
-      letter-spacing: -0.3px;
+    #header .logo { font-size: 17px; font-weight: 700; color: var(--pink); letter-spacing: -0.3px; }
+    #header .logo span { color: var(--text); }
+    #header .right-wrap { display: flex; align-items: center; gap: 8px; }
+    #header .today-badge {
+      font-size: 11px; font-weight: 600;
+      background: var(--green-light); color: var(--green-dark);
+      padding: 4px 9px; border-radius: 20px;
+      border: 1px solid #b7f0d0;
+      display: none;
     }
-
-    #header .logo span {
-      color: var(--text);
-    }
-
     #header .count-badge {
-      font-size: 12px;
-      background: var(--pink-light);
-      color: var(--pink-dark);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-weight: 500;
+      font-size: 12px; background: var(--pink-light); color: var(--pink-dark);
+      padding: 4px 10px; border-radius: 20px; font-weight: 500;
     }
 
-    /* 지도 */
-    #map {
-      position: fixed;
-      top: 52px;
-      bottom: 60px;
-      left: 0; right: 0;
-      z-index: 1;
-    }
+    #map { position: fixed; top: 52px; bottom: 60px; left: 0; right: 0; z-index: 1; }
 
-    /* 필터 바 */
     #filter-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 1000;
-      background: var(--white);
-      border-top: 1px solid var(--border);
-      padding: 10px 12px;
-      padding-bottom: max(10px, env(safe-area-inset-bottom));
-      display: flex;
-      gap: 7px;
-      overflow-x: auto;
-      scrollbar-width: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+      background: var(--white); border-top: 1px solid var(--border);
+      padding: 10px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+      display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none;
     }
     #filter-bar::-webkit-scrollbar { display: none; }
-
     .f-btn {
-      flex-shrink: 0;
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      padding: 6px 13px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: #F7F7F7;
-      color: var(--text-sub);
-      cursor: pointer;
-      transition: all 0.18s;
-      white-space: nowrap;
+      flex-shrink: 0; font-family: 'Noto Sans KR', sans-serif;
+      font-size: 12px; font-weight: 500; padding: 6px 13px;
+      border-radius: 20px; border: 1px solid var(--border);
+      background: #F7F7F7; color: var(--text-sub); cursor: pointer;
+      transition: all 0.18s; white-space: nowrap;
     }
-    .f-btn.active {
-      background: var(--pink);
-      color: white;
-      border-color: var(--pink);
-    }
+    .f-btn.active { background: var(--pink); color: white; border-color: var(--pink); }
 
-    /* 범례 */
     #legend {
-      position: absolute;
-      top: 62px;
-      left: 10px;
-      z-index: 500;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 11px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: absolute; top: 62px; left: 10px; z-index: 500;
+      background: white; border: 1px solid var(--border); border-radius: 12px;
+      padding: 10px 12px; font-size: 11px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     .leg-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: var(--text); line-height: 1; }
     .leg-row:last-child { margin-bottom: 0; }
     .leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
-    /* 팝업 커스텀 */
+    /* 진행중 배지 */
+    #ongoing-bar {
+      position: absolute; top: 62px; right: 10px; z-index: 500;
+      background: white; border: 1px solid #b7f0d0; border-radius: 10px;
+      padding: 5px 11px; font-size: 11px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: none;
+    }
+    #ongoing-bar b { color: var(--green-dark); font-weight: 700; }
+
+    /* 팝업 */
     .leaflet-popup-content-wrapper {
       border-radius: 14px !important;
       box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
-      padding: 0 !important;
-      overflow: hidden;
+      padding: 0 !important; overflow: hidden;
     }
     .leaflet-popup-content { margin: 0 !important; }
     .leaflet-popup-tip-container { display: none; }
+    .leaflet-popup-close-button {
+      top: 8px !important; right: 10px !important;
+      font-size: 16px !important; color: #aaa !important;
+    }
 
     .pop-wrap { padding: 14px 16px; min-width: 190px; }
+    .pop-header { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; }
     .pop-badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 500;
-      padding: 3px 9px;
-      border-radius: 10px;
-      margin-bottom: 7px;
+      display: inline-block; font-size: 11px; font-weight: 500;
+      padding: 3px 9px; border-radius: 10px;
+    }
+    .pop-ongoing {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+      background: var(--green-light); color: var(--green-dark);
+      border: 1px solid #b7f0d0;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
     }
     .pop-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.4; }
     .pop-row { font-size: 12px; color: var(--text-sub); line-height: 1.8; }
     .pop-row b { color: var(--text); font-weight: 500; }
-
-    /* 현재 필터 표시 */
-    #cur-label {
-      position: absolute;
-      top: 62px;
-      right: 10px;
-      z-index: 500;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 5px 11px;
-      font-size: 11px;
-      color: var(--text-sub);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    #cur-label b { color: var(--pink); font-weight: 700; }
   </style>
 </head>
 <body>
 
   <div id="header">
-    <div class="logo">🌸 <span>봄고트</span></div>
-    <div class="count-badge" id="cnt-badge">전국 50개 축제</div>
+    <div class="logo">🌸 <span>봄꽃</span></div>
+    <div class="right-wrap">
+      <div class="today-badge" id="today-badge">🟢 진행중 축제 있음</div>
+      <div class="count-badge" id="cnt-badge">전국 50개 축제</div>
+    </div>
   </div>
 
   <div id="map"></div>
@@ -198,7 +153,7 @@
     <div class="leg-row"><div class="leg-dot" style="background:#888780"></div>기타</div>
   </div>
 
-  <div id="cur-label"><b id="cur-cat">전체</b> <span id="cur-cnt">50</span>개</div>
+  <div id="ongoing-bar"><b id="ongoing-cnt">0</b>개 축제 진행중 🌸</div>
 
   <div id="filter-bar">
     <button class="f-btn active" data-cat="전체">전체</button>
@@ -217,56 +172,56 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
   const festivals = [
-    {name:"경포벚꽃축제",region:"강원 강릉",period:"4.4 ~ 4.11",place:"경포호수 일원",cat:"벚꽃",lat:37.7928,lng:128.9010},
-    {name:"삼척맹방유채꽃축제",region:"강원 삼척",period:"4.3 ~ 4.19",place:"삼척맹방유채꽃축제",cat:"유채꽃",lat:37.3727,lng:129.1660},
-    {name:"삼척 장미축제",region:"강원 삼척",period:"5.19 ~ 5.25",place:"삼척장미공원",cat:"장미",lat:37.4494,lng:129.1650},
-    {name:"영랑호 벚꽃축제",region:"강원 속초",period:"4.11 ~ 4.12",place:"영랑호잔디광장",cat:"벚꽃",lat:38.2165,lng:128.5815},
-    {name:"양양 남대천 벚꽃축제",region:"강원 양양",period:"4.4 ~ 4.5",place:"양양송이조각공원",cat:"벚꽃",lat:38.0758,lng:128.6233},
-    {name:"단종문화제",region:"강원 영월",period:"4.24 ~ 4.26",place:"장릉 및 영월 일대",cat:"기타",lat:37.1883,lng:128.4614},
-    {name:"고양 국제꽃박람회",region:"경기 고양",period:"4.24 ~ 5.10",place:"일산호수공원",cat:"기타",lat:37.6761,lng:126.7697},
-    {name:"렛츠런파크 벚꽃축제",region:"경기 과천",period:"4.3 ~ 4.12",place:"렛츠런파크 서울",cat:"벚꽃",lat:37.4390,lng:127.0072},
-    {name:"장자호수 벚꽃마실",region:"경기 구리",period:"4.11 ~ 4.18",place:"장자호수공원",cat:"벚꽃",lat:37.5943,lng:127.1305},
-    {name:"부천 원미 진달래축제",region:"경기 부천",period:"4.4 ~ 4.5",place:"원미산 진달래동산",cat:"진달래",lat:37.4940,lng:126.7838},
-    {name:"양평 용문산 산나물축제",region:"경기 양평",period:"4.24 ~ 4.26",place:"용문산관광단지 일대",cat:"기타",lat:37.5348,lng:127.5927},
-    {name:"에버랜드 튤립축제",region:"경기 용인",period:"3.20 ~ 4.30",place:"에버랜드",cat:"튤립",lat:37.2940,lng:127.2025},
-    {name:"이천백사 산수유꽃축제",region:"경기 이천",period:"4.3 ~ 4.5",place:"이천 산수유마을",cat:"산수유",lat:37.2721,lng:127.4432},
-    {name:"선진리성 벚꽃축제",region:"경남 사천",period:"4.3 ~ 4.5",place:"선진리성 일원",cat:"벚꽃",lat:34.9278,lng:128.0633},
-    {name:"진해군항제",region:"경남 창원",period:"3.27 ~ 4.5",place:"진해구 일원",cat:"벚꽃",lat:35.1533,lng:128.6967},
-    {name:"함안 낙화놀이",region:"경남 함안",period:"5.24",place:"함안 무진정 일원",cat:"기타",lat:35.2732,lng:128.4061},
-    {name:"대릉원 돌담길 축제",region:"경북 경주",period:"4.3 ~ 4.5",place:"대릉원돌담길",cat:"벚꽃",lat:35.8350,lng:129.2256},
-    {name:"영주 소백산 철쭉제",region:"경북 영주",period:"5.23 ~ 5.24",place:"소백산 일원",cat:"철쭉",lat:36.8940,lng:128.5238},
-    {name:"산수유마을꽃맞이행사",region:"경북 의성",period:"3.21 ~ 3.29",place:"의성산수유마을",cat:"산수유",lat:36.3529,lng:128.6972},
-    {name:"이월드 벚꽃축제",region:"대구 달서",period:"3.21 ~ 4.5",place:"이월드",cat:"벚꽃",lat:35.8586,lng:128.5521},
-    {name:"옥포 벚꽃축제",region:"대구 달성",period:"3.28 ~ 3.29",place:"용연사 일대",cat:"벚꽃",lat:35.7420,lng:128.4890},
-    {name:"달창지길 벚꽃축제",region:"대구 달성",period:"3.28 ~ 3.29",place:"한정리 일원",cat:"벚꽃",lat:35.7100,lng:128.4300},
-    {name:"비슬산 참꽃문화제",region:"대구 달성",period:"4.17 ~ 4.19",place:"비슬산 일원",cat:"기타",lat:35.6985,lng:128.5083},
-    {name:"화폐박물관 벚꽃 페스티벌",region:"대전 유성",period:"4.4",place:"화폐박물관 광장",cat:"벚꽃",lat:36.3748,lng:127.3452},
-    {name:"강서낙동강30리 벚꽃축제",region:"부산 강서",period:"4.3 ~ 4.6",place:"대저생태공원",cat:"벚꽃",lat:35.2133,lng:128.9769},
-    {name:"서울국제정원박람회",region:"서울 성동",period:"5.1 ~ 10.27",place:"서울숲 일대",cat:"기타",lat:37.5444,lng:127.0376},
-    {name:"석촌호수 벚꽃축제",region:"서울 송파",period:"4.3 ~ 4.11",place:"석촌호수 일대",cat:"벚꽃",lat:37.5083,lng:127.1010},
-    {name:"여의도 벚꽃축제",region:"서울 영등포",period:"4.8 ~ 4.12",place:"여의서로 국회 뒤편",cat:"벚꽃",lat:37.5268,lng:126.9330},
-    {name:"불광천 벚꽃축제",region:"서울 은평",period:"4.3 ~ 4.4",place:"불광천 일대",cat:"벚꽃",lat:37.6039,lng:126.9225},
-    {name:"연등회",region:"서울 종로",period:"5.16 ~ 5.17",place:"광화문 및 종로구 일대",cat:"기타",lat:37.5703,lng:126.9780},
-    {name:"중랑 서울장미축제",region:"서울 중랑",period:"5.15 ~ 5.23",place:"중랑장미공원",cat:"장미",lat:37.5900,lng:127.0932},
-    {name:"인천 고려산 진달래축제",region:"인천 강화",period:"4.11 ~ 4.19",place:"고려산 진달래축제",cat:"진달래",lat:37.7380,lng:126.4430},
-    {name:"광양매화축제",region:"전남 광양",period:"3.13 ~ 3.22",place:"광양매화축제",cat:"매화",lat:35.0756,lng:127.6963},
-    {name:"구례 산수유꽃축제",region:"전남 구례",period:"3.14 ~ 3.22",place:"구례 산수유꽃축제장",cat:"산수유",lat:35.2005,lng:127.4636},
-    {name:"구례 300리 벚꽃축제",region:"전남 구례",period:"3.28 ~ 3.30",place:"섬진강변 일대",cat:"벚꽃",lat:35.2040,lng:127.4800},
-    {name:"유달산 봄축제",region:"전남 목포",period:"4.4 ~ 4.5",place:"유달산 일원",cat:"벚꽃",lat:34.7898,lng:126.3855},
-    {name:"선도 수선화 축제",region:"전남 신안",period:"4.3 ~ 4.12",place:"선도",cat:"수선화",lat:34.7603,lng:126.1097},
-    {name:"여수 영취산 진달래축제",region:"전남 여수",period:"3.28 ~ 3.29",place:"흥국사 산림공원",cat:"진달래",lat:34.7889,lng:127.7029},
-    {name:"함평나비대축제",region:"전남 함평",period:"4.24 ~ 5.5",place:"함평엑스포공원",cat:"기타",lat:35.0677,lng:126.5174},
-    {name:"고창 벚꽃축제",region:"전북 고창",period:"4.3 ~ 4.5",place:"석정지구 일원",cat:"벚꽃",lat:35.4348,lng:126.7019},
-    {name:"익산백제 국가유산 야행",region:"전북 익산",period:"4.24 ~ 4.26",place:"왕궁리유적",cat:"기타",lat:35.9711,lng:127.0003},
-    {name:"옥정호 벚꽃축제",region:"전북 임실",period:"4.11 ~ 4.12",place:"옥정호 출렁다리 일원",cat:"벚꽃",lat:35.6073,lng:127.2804},
-    {name:"서귀포유채꽃축제",region:"제주 서귀포",period:"4.4 ~ 4.5",place:"조랑말체험공원 일대",cat:"유채꽃",lat:33.3688,lng:126.7972},
-    {name:"전농로 왕벚꽃 축제",region:"제주 제주",period:"3.27 ~ 3.29",place:"전농로 일대",cat:"벚꽃",lat:33.5106,lng:126.5431},
-    {name:"금산 보곡산골 산벚꽃 축제",region:"충남 금산",period:"4.11 ~ 4.19",place:"산꽃벚꽃마을 오토캠핑장",cat:"벚꽃",lat:36.1083,lng:127.4887},
-    {name:"논산딸기축제",region:"충남 논산",period:"3.26 ~ 3.29",place:"논산시민가족공원 일원",cat:"기타",lat:36.1880,lng:127.0985},
-    {name:"서산 유기방가옥 수선화축제",region:"충남 서산",period:"3.27 ~ 4.19",place:"서산유기방가옥",cat:"수선화",lat:36.6927,lng:126.4977},
-    {name:"천리포수목원 목련축제",region:"충남 태안",period:"3.27 ~ 4.19",place:"천리포수목원",cat:"기타",lat:36.8116,lng:126.3002},
-    {name:"태안세계튤립꽃박람회",region:"충남 태안",period:"4.1 ~ 5.6",place:"네이처월드",cat:"튤립",lat:36.7451,lng:126.2973},
-    {name:"청풍호 벚꽃축제",region:"충북 제천",period:"4.4 ~ 4.19",place:"청풍호 일대",cat:"벚꽃",lat:36.9927,lng:128.1673},
+    {name:"경포벚꽃축제",region:"강원 강릉",period:"4.4 ~ 4.11",place:"경포호수 일원",cat:"벚꽃",lat:37.7928,lng:128.9010,start:"2026-04-04",end:"2026-04-11"},
+    {name:"삼척맹방유채꽃축제",region:"강원 삼척",period:"4.3 ~ 4.19",place:"삼척맹방유채꽃축제",cat:"유채꽃",lat:37.3727,lng:129.1660,start:"2026-04-03",end:"2026-04-19"},
+    {name:"삼척 장미축제",region:"강원 삼척",period:"5.19 ~ 5.25",place:"삼척장미공원",cat:"장미",lat:37.4494,lng:129.1650,start:"2026-05-19",end:"2026-05-25"},
+    {name:"영랑호 벚꽃축제",region:"강원 속초",period:"4.11 ~ 4.12",place:"영랑호잔디광장",cat:"벚꽃",lat:38.2165,lng:128.5815,start:"2026-04-11",end:"2026-04-12"},
+    {name:"양양 남대천 벚꽃축제",region:"강원 양양",period:"4.4 ~ 4.5",place:"양양송이조각공원",cat:"벚꽃",lat:38.0758,lng:128.6233,start:"2026-04-04",end:"2026-04-05"},
+    {name:"단종문화제",region:"강원 영월",period:"4.24 ~ 4.26",place:"장릉 및 영월 일대",cat:"기타",lat:37.1883,lng:128.4614,start:"2026-04-24",end:"2026-04-26"},
+    {name:"고양 국제꽃박람회",region:"경기 고양",period:"4.24 ~ 5.10",place:"일산호수공원",cat:"기타",lat:37.6761,lng:126.7697,start:"2026-04-24",end:"2026-05-10"},
+    {name:"렛츠런파크 벚꽃축제",region:"경기 과천",period:"4.3 ~ 4.12",place:"렛츠런파크 서울",cat:"벚꽃",lat:37.4390,lng:127.0072,start:"2026-04-03",end:"2026-04-12"},
+    {name:"장자호수 벚꽃마실",region:"경기 구리",period:"4.11 ~ 4.18",place:"장자호수공원",cat:"벚꽃",lat:37.5943,lng:127.1305,start:"2026-04-11",end:"2026-04-18"},
+    {name:"부천 원미 진달래축제",region:"경기 부천",period:"4.4 ~ 4.5",place:"원미산 진달래동산",cat:"진달래",lat:37.4940,lng:126.7838,start:"2026-04-04",end:"2026-04-05"},
+    {name:"양평 용문산 산나물축제",region:"경기 양평",period:"4.24 ~ 4.26",place:"용문산관광단지 일대",cat:"기타",lat:37.5348,lng:127.5927,start:"2026-04-24",end:"2026-04-26"},
+    {name:"에버랜드 튤립축제",region:"경기 용인",period:"3.20 ~ 4.30",place:"에버랜드",cat:"튤립",lat:37.2940,lng:127.2025,start:"2026-03-20",end:"2026-04-30"},
+    {name:"이천백사 산수유꽃축제",region:"경기 이천",period:"4.3 ~ 4.5",place:"이천 산수유마을",cat:"산수유",lat:37.2721,lng:127.4432,start:"2026-04-03",end:"2026-04-05"},
+    {name:"선진리성 벚꽃축제",region:"경남 사천",period:"4.3 ~ 4.5",place:"선진리성 일원",cat:"벚꽃",lat:34.9278,lng:128.0633,start:"2026-04-03",end:"2026-04-05"},
+    {name:"진해군항제",region:"경남 창원",period:"3.27 ~ 4.5",place:"진해구 일원",cat:"벚꽃",lat:35.1533,lng:128.6967,start:"2026-03-27",end:"2026-04-05"},
+    {name:"함안 낙화놀이",region:"경남 함안",period:"5.24",place:"함안 무진정 일원",cat:"기타",lat:35.2732,lng:128.4061,start:"2026-05-24",end:"2026-05-24"},
+    {name:"대릉원 돌담길 축제",region:"경북 경주",period:"4.3 ~ 4.5",place:"대릉원돌담길",cat:"벚꽃",lat:35.8350,lng:129.2256,start:"2026-04-03",end:"2026-04-05"},
+    {name:"영주 소백산 철쭉제",region:"경북 영주",period:"5.23 ~ 5.24",place:"소백산 일원",cat:"철쭉",lat:36.8940,lng:128.5238,start:"2026-05-23",end:"2026-05-24"},
+    {name:"산수유마을꽃맞이행사",region:"경북 의성",period:"3.21 ~ 3.29",place:"의성산수유마을",cat:"산수유",lat:36.3529,lng:128.6972,start:"2026-03-21",end:"2026-03-29"},
+    {name:"이월드 벚꽃축제",region:"대구 달서",period:"3.21 ~ 4.5",place:"이월드",cat:"벚꽃",lat:35.8586,lng:128.5521,start:"2026-03-21",end:"2026-04-05"},
+    {name:"옥포 벚꽃축제",region:"대구 달성",period:"3.28 ~ 3.29",place:"용연사 일대",cat:"벚꽃",lat:35.7420,lng:128.4890,start:"2026-03-28",end:"2026-03-29"},
+    {name:"달창지길 벚꽃축제",region:"대구 달성",period:"3.28 ~ 3.29",place:"한정리 일원",cat:"벚꽃",lat:35.7100,lng:128.4300,start:"2026-03-28",end:"2026-03-29"},
+    {name:"비슬산 참꽃문화제",region:"대구 달성",period:"4.17 ~ 4.19",place:"비슬산 일원",cat:"기타",lat:35.6985,lng:128.5083,start:"2026-04-17",end:"2026-04-19"},
+    {name:"화폐박물관 벚꽃 페스티벌",region:"대전 유성",period:"4.4",place:"화폐박물관 광장",cat:"벚꽃",lat:36.3748,lng:127.3452,start:"2026-04-04",end:"2026-04-04"},
+    {name:"강서낙동강30리 벚꽃축제",region:"부산 강서",period:"4.3 ~ 4.6",place:"대저생태공원",cat:"벚꽃",lat:35.2133,lng:128.9769,start:"2026-04-03",end:"2026-04-06"},
+    {name:"서울국제정원박람회",region:"서울 성동",period:"5.1 ~ 10.27",place:"서울숲 일대",cat:"기타",lat:37.5444,lng:127.0376,start:"2026-05-01",end:"2026-10-27"},
+    {name:"석촌호수 벚꽃축제",region:"서울 송파",period:"4.3 ~ 4.11",place:"석촌호수 일대",cat:"벚꽃",lat:37.5083,lng:127.1010,start:"2026-04-03",end:"2026-04-11"},
+    {name:"여의도 벚꽃축제",region:"서울 영등포",period:"4.8 ~ 4.12",place:"여의서로 국회 뒤편",cat:"벚꽃",lat:37.5268,lng:126.9330,start:"2026-04-08",end:"2026-04-12"},
+    {name:"불광천 벚꽃축제",region:"서울 은평",period:"4.3 ~ 4.4",place:"불광천 일대",cat:"벚꽃",lat:37.6039,lng:126.9225,start:"2026-04-03",end:"2026-04-04"},
+    {name:"연등회",region:"서울 종로",period:"5.16 ~ 5.17",place:"광화문 및 종로구 일대",cat:"기타",lat:37.5703,lng:126.9780,start:"2026-05-16",end:"2026-05-17"},
+    {name:"중랑 서울장미축제",region:"서울 중랑",period:"5.15 ~ 5.23",place:"중랑장미공원",cat:"장미",lat:37.5900,lng:127.0932,start:"2026-05-15",end:"2026-05-23"},
+    {name:"인천 고려산 진달래축제",region:"인천 강화",period:"4.11 ~ 4.19",place:"고려산 진달래축제",cat:"진달래",lat:37.7380,lng:126.4430,start:"2026-04-11",end:"2026-04-19"},
+    {name:"광양매화축제",region:"전남 광양",period:"3.13 ~ 3.22",place:"광양매화축제",cat:"매화",lat:35.0756,lng:127.6963,start:"2026-03-13",end:"2026-03-22"},
+    {name:"구례 산수유꽃축제",region:"전남 구례",period:"3.14 ~ 3.22",place:"구례 산수유꽃축제장",cat:"산수유",lat:35.2005,lng:127.4636,start:"2026-03-14",end:"2026-03-22"},
+    {name:"구례 300리 벚꽃축제",region:"전남 구례",period:"3.28 ~ 3.30",place:"섬진강변 일대",cat:"벚꽃",lat:35.2040,lng:127.4800,start:"2026-03-28",end:"2026-03-30"},
+    {name:"유달산 봄축제",region:"전남 목포",period:"4.4 ~ 4.5",place:"유달산 일원",cat:"벚꽃",lat:34.7898,lng:126.3855,start:"2026-04-04",end:"2026-04-05"},
+    {name:"선도 수선화 축제",region:"전남 신안",period:"4.3 ~ 4.12",place:"선도",cat:"수선화",lat:34.7603,lng:126.1097,start:"2026-04-03",end:"2026-04-12"},
+    {name:"여수 영취산 진달래축제",region:"전남 여수",period:"3.28 ~ 3.29",place:"흥국사 산림공원",cat:"진달래",lat:34.7889,lng:127.7029,start:"2026-03-28",end:"2026-03-29"},
+    {name:"함평나비대축제",region:"전남 함평",period:"4.24 ~ 5.5",place:"함평엑스포공원",cat:"기타",lat:35.0677,lng:126.5174,start:"2026-04-24",end:"2026-05-05"},
+    {name:"고창 벚꽃축제",region:"전북 고창",period:"4.3 ~ 4.5",place:"석정지구 일원",cat:"벚꽃",lat:35.4348,lng:126.7019,start:"2026-04-03",end:"2026-04-05"},
+    {name:"익산백제 국가유산 야행",region:"전북 익산",period:"4.24 ~ 4.26",place:"왕궁리유적",cat:"기타",lat:35.9711,lng:127.0003,start:"2026-04-24",end:"2026-04-26"},
+    {name:"옥정호 벚꽃축제",region:"전북 임실",period:"4.11 ~ 4.12",place:"옥정호 출렁다리 일원",cat:"벚꽃",lat:35.6073,lng:127.2804,start:"2026-04-11",end:"2026-04-12"},
+    {name:"서귀포유채꽃축제",region:"제주 서귀포",period:"4.4 ~ 4.5",place:"조랑말체험공원 일대",cat:"유채꽃",lat:33.3688,lng:126.7972,start:"2026-04-04",end:"2026-04-05"},
+    {name:"전농로 왕벚꽃 축제",region:"제주 제주",period:"3.27 ~ 3.29",place:"전농로 일대",cat:"벚꽃",lat:33.5106,lng:126.5431,start:"2026-03-27",end:"2026-03-29"},
+    {name:"금산 보곡산골 산벚꽃 축제",region:"충남 금산",period:"4.11 ~ 4.19",place:"산꽃벚꽃마을 오토캠핑장",cat:"벚꽃",lat:36.1083,lng:127.4887,start:"2026-04-11",end:"2026-04-19"},
+    {name:"논산딸기축제",region:"충남 논산",period:"3.26 ~ 3.29",place:"논산시민가족공원 일원",cat:"기타",lat:36.1880,lng:127.0985,start:"2026-03-26",end:"2026-03-29"},
+    {name:"서산 유기방가옥 수선화축제",region:"충남 서산",period:"3.27 ~ 4.19",place:"서산유기방가옥",cat:"수선화",lat:36.6927,lng:126.4977,start:"2026-03-27",end:"2026-04-19"},
+    {name:"천리포수목원 목련축제",region:"충남 태안",period:"3.27 ~ 4.19",place:"천리포수목원",cat:"기타",lat:36.8116,lng:126.3002,start:"2026-03-27",end:"2026-04-19"},
+    {name:"태안세계튤립꽃박람회",region:"충남 태안",period:"4.1 ~ 5.6",place:"네이처월드",cat:"튤립",lat:36.7451,lng:126.2973,start:"2026-04-01",end:"2026-05-06"},
+    {name:"청풍호 벚꽃축제",region:"충북 제천",period:"4.4 ~ 4.19",place:"청풍호 일대",cat:"벚꽃",lat:36.9927,lng:128.1673,start:"2026-04-04",end:"2026-04-19"},
   ];
 
   const catColor = {
@@ -274,19 +229,38 @@
     "산수유":"#1D9E75","매화":"#1D9E75","장미":"#D4537E",
     "튤립":"#7F77DD","수선화":"#7F77DD","철쭉":"#888780","기타":"#888780"
   };
-
   const catEmoji = {
     "벚꽃":"🌸","진달래":"🌺","유채꽃":"🌼","산수유":"🌿","매화":"🌸",
     "장미":"🌹","튤립":"🌷","수선화":"💐","철쭉":"🌸","기타":"🎪"
   };
 
-  function makeIcon(cat) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  function isOngoing(f) {
+    const s = new Date(f.start); s.setHours(0,0,0,0);
+    const e = new Date(f.end); e.setHours(23,59,59,999);
+    return today >= s && today <= e;
+  }
+
+  // 작고 귀여운 꽃 모양 마커
+  function makeIcon(cat, ongoing) {
     const c = catColor[cat] || "#888780";
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="38" viewBox="0 0 30 38">
-      <path d="M15 0C6.716 0 0 6.716 0 15c0 10 15 23 15 23S30 25 30 15C30 6.716 23.284 0 15 0z" fill="${c}"/>
-      <circle cx="15" cy="15" r="8" fill="white" fill-opacity="0.92"/>
+    const size = ongoing ? 22 : 16;
+    const ring = ongoing
+      ? `<circle cx="11" cy="11" r="10" fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.6"/>`
+      : '';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ongoing?22:16}" height="${ongoing?22:16}" viewBox="0 0 22 22">
+      ${ring}
+      <circle cx="11" cy="11" r="${ongoing?7:6}" fill="${c}" opacity="0.95"/>
+      <circle cx="11" cy="11" r="${ongoing?3.5:2.5}" fill="white" opacity="0.9"/>
     </svg>`;
-    return L.divIcon({ html: svg, className: '', iconSize:[30,38], iconAnchor:[15,38], popupAnchor:[0,-38] });
+    return L.divIcon({
+      html: svg, className: '',
+      iconSize: [size, size],
+      iconAnchor: [size/2, size/2],
+      popupAnchor: [0, -(size/2+4)]
+    });
   }
 
   const map = L.map('map', { center:[36.2,127.9], zoom:7, zoomControl:false });
@@ -296,28 +270,67 @@
   L.control.zoom({ position:'bottomright' }).addTo(map);
 
   let markers = [];
+  let ongoingMarkers = [];
 
   function render(filter) {
     markers.forEach(m => map.removeLayer(m));
-    markers = [];
+    markers = []; ongoingMarkers = [];
+
     const data = filter === "전체" ? festivals : festivals.filter(f => f.cat === filter);
+    const ongoingList = data.filter(f => isOngoing(f));
+
     document.getElementById('cnt-badge').textContent = `전국 ${data.length}개 축제`;
-    document.getElementById('cur-cat').textContent = filter;
-    document.getElementById('cur-cnt').textContent = data.length;
-    data.forEach(f => {
+
+    // 진행중 배지
+    if (ongoingList.length > 0) {
+      document.getElementById('ongoing-bar').style.display = 'block';
+      document.getElementById('ongoing-cnt').textContent = ongoingList.length;
+      document.getElementById('today-badge').style.display = 'inline-block';
+    } else {
+      document.getElementById('ongoing-bar').style.display = 'none';
+      document.getElementById('today-badge').style.display = 'none';
+    }
+
+    // 일반 마커 먼저 (z-index 낮게)
+    data.filter(f => !isOngoing(f)).forEach(f => {
       const c = catColor[f.cat] || "#888780";
       const e = catEmoji[f.cat] || "🎪";
       const popup = `<div class="pop-wrap">
-        <div class="pop-badge" style="background:${c}18;color:${c};border:1px solid ${c}44">${e} ${f.cat}</div>
+        <div class="pop-header">
+          <span class="pop-badge" style="background:${c}18;color:${c};border:1px solid ${c}44">${e} ${f.cat}</span>
+        </div>
         <div class="pop-name">${f.name}</div>
         <div class="pop-row">📅 <b>${f.period}</b></div>
         <div class="pop-row">📍 ${f.place}</div>
         <div class="pop-row" style="margin-top:2px;font-size:11px;color:#aaa">${f.region}</div>
       </div>`;
-      const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat)})
-        .bindPopup(popup, {maxWidth:240, closeButton:false})
+      const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, false)})
+        .bindPopup(popup, {maxWidth:240, closeButton:true})
         .addTo(map);
       markers.push(m);
+    });
+
+    // 진행중 마커 나중에 (z-index 높게, 팝업 자동 오픈)
+    ongoingList.forEach((f, idx) => {
+      const c = catColor[f.cat] || "#888780";
+      const e = catEmoji[f.cat] || "🎪";
+      const popup = `<div class="pop-wrap">
+        <div class="pop-header">
+          <span class="pop-badge" style="background:${c}18;color:${c};border:1px solid ${c}44">${e} ${f.cat}</span>
+          <span class="pop-ongoing">🟢 진행중</span>
+        </div>
+        <div class="pop-name">${f.name}</div>
+        <div class="pop-row">📅 <b>${f.period}</b></div>
+        <div class="pop-row">📍 ${f.place}</div>
+        <div class="pop-row" style="margin-top:2px;font-size:11px;color:#aaa">${f.region}</div>
+      </div>`;
+      const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, true), zIndexOffset: 1000})
+        .bindPopup(popup, {maxWidth:240, closeButton:true, autoClose:false, closeOnClick:false})
+        .addTo(map);
+      // 첫 번째 진행중 축제만 자동 오픈
+      if (idx === 0) setTimeout(() => m.openPopup(), 600);
+      markers.push(m);
+      ongoingMarkers.push(m);
     });
   }
 
