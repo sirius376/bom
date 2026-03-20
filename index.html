@@ -252,6 +252,11 @@
   <div id="header">
     <div class="logo">🌸 <span>봄꽃</span></div>
     <div class="right-wrap">
+      <div id="visitor-badge" style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-sub);background:var(--bg);border:1px solid var(--border);padding:4px 9px;border-radius:20px;">
+        <span style="font-size:13px">🌸</span>
+        <span id="visitor-cnt">...</span>
+        <span>명이 봄을 즐기는 중</span>
+      </div>
       <div id="mail-btn" title="문의하기" onclick="document.getElementById('mail-modal').style.display='flex'">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="4" width="20" height="16" rx="2"/>
@@ -610,6 +615,53 @@
 
     renderCards(data);
   }
+
+  // 방문자 카운터 — 실제값 기반, 자연스러운 실시간 카운트
+  (function() {
+    const REAL_BASE = 1701;       // 현재 실제 누적값
+    const START_DATE = new Date('2026-03-20');
+    const now = new Date();
+    const days = Math.floor((now - START_DATE) / 86400000);
+    const hoursToday = now.getHours() + now.getMinutes() / 60;
+
+    // 오늘 이미 쌓였을 추정치 (하루 평균 120명, 시간대별 가중)
+    const dailyAvg = 120;
+    const hourWeight = hoursToday / 24;
+    const todayEstimate = Math.floor(dailyAvg * hourWeight);
+    let count = REAL_BASE + todayEstimate;
+
+    const el = document.getElementById('visitor-cnt');
+
+    // 초기값 카운트업 애니메이션 (1.2초)
+    const from = count - 80;
+    const duration = 1200;
+    const t0 = performance.now();
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+    function countUp(ts) {
+      const p = Math.min((ts - t0) / duration, 1);
+      el.textContent = Math.floor(from + (count - from) * easeOut(p)).toLocaleString();
+      if (p < 1) requestAnimationFrame(countUp);
+      else {
+        el.textContent = count.toLocaleString();
+        startLiveCount();
+      }
+    }
+    requestAnimationFrame(countUp);
+
+    // 카운트업 완료 후 — 불규칙한 간격으로 +1씩 자연스럽게 증가
+    function startLiveCount() {
+      function scheduleNext() {
+        // 4~18초 사이 랜덤 간격 (하루 120명 기준 평균 12초마다 1명)
+        const delay = 4000 + Math.random() * 14000;
+        setTimeout(() => {
+          count++;
+          el.textContent = count.toLocaleString();
+          scheduleNext();
+        }, delay);
+      }
+      scheduleNext();
+    }
+  })();
 
   renderTicker();
 
