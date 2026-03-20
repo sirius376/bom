@@ -47,13 +47,6 @@
     #header .logo { font-size: 17px; font-weight: 700; color: var(--pink); letter-spacing: -0.3px; }
     #header .logo span { color: var(--text); }
     #header .right-wrap { display: flex; align-items: center; gap: 8px; }
-    #header .today-badge {
-      font-size: 11px; font-weight: 600;
-      background: var(--green-light); color: var(--green-dark);
-      padding: 4px 9px; border-radius: 20px;
-      border: 1px solid #b7f0d0;
-      display: none;
-    }
     #header .count-badge {
       font-size: 12px; background: var(--pink-light); color: var(--pink-dark);
       padding: 4px 10px; border-radius: 20px; font-weight: 500;
@@ -382,10 +375,8 @@
     if (ongoingList.length > 0) {
       document.getElementById('ongoing-bar').style.display = 'block';
       document.getElementById('ongoing-cnt').textContent = ongoingList.length;
-      document.getElementById('today-badge').style.display = 'inline-block';
     } else {
       document.getElementById('ongoing-bar').style.display = 'none';
-      document.getElementById('today-badge').style.display = 'none';
     }
 
     function makePopup(f, ongoing) {
