@@ -127,6 +127,13 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.6; }
     }
+    @keyframes dotPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.15; }
+    }
+    .marker-dot-ongoing {
+      animation: dotPulse 2s ease-in-out infinite;
+    }
     .pop-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.4; }
     .pop-row { font-size: 12px; color: var(--text-sub); line-height: 1.8; }
     .pop-row b { color: var(--text); font-weight: 500; }
@@ -245,20 +252,49 @@
   }
 
   // 꽃 모양 마커 (모바일 최적화 사이즈)
+  // 파스텔 색상 매핑 (구슬용 — 메인/하이라이트/그림자)
+  const pastel = {
+    "벚꽃":   {main:"#F4A0A0", hi:"#FDDEDE", sh:"#C96B6B"},
+    "진달래": {main:"#A8D08D", hi:"#D6EFCA", sh:"#6B9E52"},
+    "유채꽃": {main:"#F7CF85", hi:"#FDF0C4", sh:"#C89A35"},
+    "산수유": {main:"#85C9A8", hi:"#C4EAD9", sh:"#3D9E76"},
+    "매화":   {main:"#C9A8D4", hi:"#E8D4F0", sh:"#8B5FA0"},
+    "장미":   {main:"#F4A0C0", hi:"#FDDEED", sh:"#C96B8A"},
+    "튤립":   {main:"#A8B8F4", hi:"#D4DCFD", sh:"#5A6EC9"},
+    "수선화": {main:"#A8D4E8", hi:"#D0EEF7", sh:"#4A9EC0"},
+    "철쭉":   {main:"#C4A8D4", hi:"#E4D4F0", sh:"#8A5FA0"},
+    "기타":   {main:"#C0BDB5", hi:"#E4E2DD", sh:"#8A8880"},
+  };
+
   function makeIcon(cat, ongoing) {
-    const c = catColor[cat] || "#888780";
-    const size = ongoing ? 46 : 36;
+    const p = pastel[cat] || pastel["기타"];
+    const size = ongoing ? 44 : 34;
     const cx = size / 2;
-    const ring = ongoing
-      ? `<circle cx="${cx}" cy="${cx}" r="${cx-2}" fill="none" stroke="${c}" stroke-width="2.5" stroke-dasharray="5,3" opacity="0.5"/>`
-      : '';
-    const outerR = ongoing ? cx - 7 : cx - 5;
-    const innerR = ongoing ? 7 : 5.5;
+    const r = cx - 3;
+    // 구슬 입체감: 방사형 그라데이션 id를 고유하게
+    const gid = `g_${cat.charCodeAt(0)}_${ongoing?1:0}`;
+    const sid = `s_${cat.charCodeAt(0)}_${ongoing?1:0}`;
+    // 진행중 내부 점 색상 (초록)
+    const dotColor = ongoing ? "#2ECC71" : p.hi;
+    const dotClass = ongoing ? 'class="marker-dot-ongoing"' : '';
+
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-      ${ring}
-      <circle cx="${cx}" cy="${cx}" r="${outerR}" fill="${c}" opacity="0.95"/>
-      <circle cx="${cx}" cy="${cx}" r="${innerR}" fill="white" opacity="0.92"/>
+      <defs>
+        <radialGradient id="${gid}" cx="38%" cy="32%" r="60%">
+          <stop offset="0%" stop-color="${p.hi}"/>
+          <stop offset="45%" stop-color="${p.main}"/>
+          <stop offset="100%" stop-color="${p.sh}"/>
+        </radialGradient>
+        <radialGradient id="${sid}" cx="35%" cy="30%" r="50%">
+          <stop offset="0%" stop-color="white" stop-opacity="0.75"/>
+          <stop offset="100%" stop-color="white" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="${cx}" cy="${cx}" r="${r}" fill="url(#${gid})"/>
+      <circle cx="${cx}" cy="${cx}" r="${r}" fill="url(#${sid})"/>
+      <circle cx="${cx}" cy="${cx}" r="${ongoing ? 6 : 4.5}" fill="${dotColor}" opacity="0.95" ${dotClass}/>
     </svg>`;
+
     return L.divIcon({
       html: svg, className: '',
       iconSize: [size, size],
@@ -341,7 +377,7 @@
     });
   }
 
-  // 진행중 배지 클릭 → 지도 축소 후 마커 반짝임
+  // 진행중 배지 클릭 → 지도 축소 후 내부 점만 빠르게 반짝임
   document.getElementById('ongoing-bar').addEventListener('click', () => {
     if (ongoingMarkers.length === 0) return;
     map.closePopup();
@@ -350,12 +386,20 @@
       ongoingMarkers.forEach(m => {
         const el = m.getElement();
         if (!el) return;
+        const dot = el.querySelector('.marker-dot-ongoing');
+        if (!dot) return;
+        // 잠깐 빠른 깜빡임 후 다시 일반 애니메이션으로
+        dot.style.animation = 'none';
         let count = 0;
         const interval = setInterval(() => {
-          el.style.opacity = count % 2 === 0 ? '0.2' : '1';
+          dot.style.opacity = count % 2 === 0 ? '0.1' : '1';
           count++;
-          if (count >= 8) { clearInterval(interval); el.style.opacity = '1'; }
-        }, 160);
+          if (count >= 10) {
+            clearInterval(interval);
+            dot.style.opacity = '1';
+            dot.style.animation = 'dotPulse 2s ease-in-out infinite';
+          }
+        }, 120);
       });
     }, 1100);
   });
