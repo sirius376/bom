@@ -250,11 +250,7 @@
 <body>
 
   <div id="header">
-    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-sub);">
-      <span style="font-size:13px">🌸</span>
-      <span id="visitor-cnt" style="font-weight:600;color:var(--text);">...</span>
-      <span>명이 봄을 즐기는 중</span>
-    </div>
+    <div class="logo">🌸 <span>봄꽃</span></div>
     <div class="right-wrap">
       <div id="mail-btn" title="문의하기" onclick="document.getElementById('mail-modal').style.display='flex'">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -689,44 +685,6 @@
     render(btn.dataset.cat);
   });
 
-  // 방문자 카운터 — localStorage로 세션 간 유지
-  (function() {
-    const REAL_BASE = 1701;
-    const stored = parseInt(localStorage.getItem('bom_visitor') || '0');
-    let count = (stored >= REAL_BASE && stored <= REAL_BASE + 5000) ? stored : REAL_BASE;
-    localStorage.setItem('bom_visitor', count);
-
-    const el = document.getElementById('visitor-cnt');
-    if (!el) return;
-
-    const from = Math.max(count - 150, REAL_BASE);
-    const duration = 1400;
-    const t0 = performance.now();
-    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
-    function countUp(ts) {
-      const p = Math.min((ts - t0) / duration, 1);
-      el.textContent = Math.floor(from + (count - from) * easeOut(p)).toLocaleString();
-      if (p < 1) requestAnimationFrame(countUp);
-      else { el.textContent = count.toLocaleString(); startLiveCount(); }
-    }
-    requestAnimationFrame(countUp);
-
-    function getDelay() {
-      const h = new Date().getHours();
-      return (h >= 22 || h < 7) ? 30000 + Math.random() * 30000 : 4000 + Math.random() * 5000;
-    }
-    function startLiveCount() {
-      function next() {
-        setTimeout(() => {
-          count++;
-          localStorage.setItem('bom_visitor', count);
-          el.textContent = count.toLocaleString();
-          next();
-        }, getDelay());
-      }
-      next();
-    }
-  })();
   </script>
 
   <!-- 문의 모달 -->
