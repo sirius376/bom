@@ -92,7 +92,8 @@
       background: white; border: 1px solid #b7f0d0; border-radius: 10px;
       padding: 5px 11px; font-size: 11px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      display: none;
+      display: none; cursor: pointer;
+      user-select: none;
     }
     #ongoing-bar b { color: var(--green-dark); font-weight: 700; }
 
@@ -243,23 +244,26 @@
     return today >= s && today <= e;
   }
 
-  // 작고 귀여운 꽃 모양 마커
+  // 꽃 모양 마커 (모바일 최적화 사이즈)
   function makeIcon(cat, ongoing) {
     const c = catColor[cat] || "#888780";
-    const size = ongoing ? 22 : 16;
+    const size = ongoing ? 46 : 36;
+    const cx = size / 2;
     const ring = ongoing
-      ? `<circle cx="11" cy="11" r="10" fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.6"/>`
+      ? `<circle cx="${cx}" cy="${cx}" r="${cx-2}" fill="none" stroke="${c}" stroke-width="2.5" stroke-dasharray="5,3" opacity="0.5"/>`
       : '';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ongoing?22:16}" height="${ongoing?22:16}" viewBox="0 0 22 22">
+    const outerR = ongoing ? cx - 7 : cx - 5;
+    const innerR = ongoing ? 7 : 5.5;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
       ${ring}
-      <circle cx="11" cy="11" r="${ongoing?7:6}" fill="${c}" opacity="0.95"/>
-      <circle cx="11" cy="11" r="${ongoing?3.5:2.5}" fill="white" opacity="0.9"/>
+      <circle cx="${cx}" cy="${cx}" r="${outerR}" fill="${c}" opacity="0.95"/>
+      <circle cx="${cx}" cy="${cx}" r="${innerR}" fill="white" opacity="0.92"/>
     </svg>`;
     return L.divIcon({
       html: svg, className: '',
       iconSize: [size, size],
-      iconAnchor: [size/2, size/2],
-      popupAnchor: [0, -(size/2+4)]
+      iconAnchor: [cx, cx],
+      popupAnchor: [0, -(cx + 6)]
     });
   }
 
@@ -291,7 +295,9 @@
       document.getElementById('today-badge').style.display = 'none';
     }
 
-    // 일반 마커 먼저 (z-index 낮게)
+    function closeAll() { markers.forEach(m => m.closePopup()); }
+
+    // 일반 마커
     data.filter(f => !isOngoing(f)).forEach(f => {
       const c = catColor[f.cat] || "#888780";
       const e = catEmoji[f.cat] || "🎪";
@@ -307,10 +313,11 @@
       const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, false)})
         .bindPopup(popup, {maxWidth:240, closeButton:true})
         .addTo(map);
+      m.on('click', () => { closeAll(); setTimeout(() => m.openPopup(), 10); });
       markers.push(m);
     });
 
-    // 진행중 마커 나중에 (z-index 높게, 팝업 자동 오픈)
+    // 진행중 마커
     ongoingList.forEach((f, idx) => {
       const c = catColor[f.cat] || "#888780";
       const e = catEmoji[f.cat] || "🎪";
@@ -327,12 +334,31 @@
       const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, true), zIndexOffset: 1000})
         .bindPopup(popup, {maxWidth:240, closeButton:true, autoClose:false, closeOnClick:false})
         .addTo(map);
-      // 첫 번째 진행중 축제만 자동 오픈
+      m.on('click', () => { closeAll(); setTimeout(() => m.openPopup(), 10); });
       if (idx === 0) setTimeout(() => m.openPopup(), 600);
       markers.push(m);
       ongoingMarkers.push(m);
     });
   }
+
+  // 진행중 배지 클릭 → 지도 축소 후 마커 반짝임
+  document.getElementById('ongoing-bar').addEventListener('click', () => {
+    if (ongoingMarkers.length === 0) return;
+    map.closePopup();
+    map.flyTo([36.2, 127.9], 7, { duration: 1.0 });
+    setTimeout(() => {
+      ongoingMarkers.forEach(m => {
+        const el = m.getElement();
+        if (!el) return;
+        let count = 0;
+        const interval = setInterval(() => {
+          el.style.opacity = count % 2 === 0 ? '0.2' : '1';
+          count++;
+          if (count >= 8) { clearInterval(interval); el.style.opacity = '1'; }
+        }, 160);
+      });
+    }, 1100);
+  });
 
   render("전체");
 
