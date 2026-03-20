@@ -690,14 +690,15 @@
   });
 
   // 진짜 방문자 카운터 — Upstash Redis API
-  fetch('/api/visitors')
-    .then(r => r.json())
-    .then(d => {
-      const el = document.getElementById('visitor-cnt');
-      if (!el || !d.count) return;
-      const target = d.count;
-      const from = Math.max(target - 80, 0);
-      const duration = 1200;
+  (function() {
+    const el = document.getElementById('visitor-cnt');
+    if (!el) return;
+
+    function animate(target) {
+      const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
+      if (current >= target) { el.textContent = target.toLocaleString(); return; }
+      const from = current;
+      const duration = 800;
       const t0 = performance.now();
       function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
       function tick(ts) {
@@ -706,11 +707,22 @@
         if (p < 1) requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
-    })
-    .catch(() => {
-      const el = document.getElementById('visitor-cnt');
-      if (el) el.textContent = '🌸';
-    });
+    }
+
+    // 최초 접속 — POST로 +1 카운트
+    fetch('/api/visitors', { method: 'POST' })
+      .then(r => r.json())
+      .then(d => { if (d.count) animate(d.count); })
+      .catch(() => { el.textContent = '🌸'; });
+
+    // 10초마다 GET으로 최신값 읽어서 자연스럽게 갱신
+    setInterval(() => {
+      fetch('/api/visitors')
+        .then(r => r.json())
+        .then(d => { if (d.count) animate(d.count); })
+        .catch(() => {});
+    }, 10000);
+  })();
 
   </script>
 
