@@ -538,56 +538,63 @@
     document.getElementById('list-panel').classList.remove('open');
   });
 
-  render("전체");
-
-  // 진행중 배지 — 항상 전체 기준 진행중 개수 표시
-  const allOngoing = festivals.filter(f => isOngoing(f));
-  const ongoingBarEl = document.getElementById('ongoing-bar');
-  if (allOngoing.length > 0) {
-    ongoingBarEl.style.display = 'block';
-    document.getElementById('ongoing-cnt').textContent = allOngoing.length;
-  } else {
-    ongoingBarEl.style.display = 'none';
-  }
-
-  // 티커 속도 — 빠르게 고정
+  // 티커 속도
   document.getElementById('ticker-inner').style.animationDuration = '12s';
 
-  // 진행중 배지 클릭 → 진행중 축제만 보이기 토글
-  let ongoingFilterActive = false;
+  // 최초 렌더
+  render("전체");
+
+  // 진행중 배지 — 전체 기준 진행중 개수 항상 표시
+  const allOngoing = festivals.filter(f => isOngoing(f));
+  const ongoingBarEl = document.getElementById('ongoing-bar');
+  document.getElementById('ongoing-cnt').textContent = allOngoing.length;
+  ongoingBarEl.style.display = allOngoing.length > 0 ? 'block' : 'none';
+
+  // 진행중 배지 클릭 토글
+  let ongoingMode = false;
   ongoingBarEl.addEventListener('click', () => {
-    ongoingFilterActive = !ongoingFilterActive;
-    if (ongoingFilterActive) {
+    ongoingMode = !ongoingMode;
+
+    if (ongoingMode) {
+      // 활성: 초록 스타일
       ongoingBarEl.style.background = '#2ECC71';
       ongoingBarEl.style.color = 'white';
-      ongoingBarEl.style.borderColor = '#2ECC71';
-      // 현재 마커 전부 제거 후 진행중만 추가
+      ongoingBarEl.style.borderColor = '#1aab5a';
+
+      // 모든 마커 지우고 진행중만 새로 그리기
       markers.forEach(m => map.removeLayer(m));
-      markers.length = 0; ongoingMarkers.length = 0;
+      markers = [];
+      ongoingMarkers = [];
+
       allOngoing.forEach(f => {
         const m = L.marker([f.lat, f.lng], {icon: makeIcon(f.cat, true), zIndexOffset: 1000})
           .bindPopup(makePopup(f, true), {maxWidth:240, closeButton:true, autoClose:false, closeOnClick:false})
           .addTo(map);
-        m.on('click', () => { markers.forEach(mk => mk.closePopup()); setTimeout(() => m.openPopup(), 10); });
-        markers.push(m); ongoingMarkers.push(m);
+        m.on('click', () => { closeAll(); setTimeout(() => m.openPopup(), 10); });
+        markers.push(m);
+        ongoingMarkers.push(m);
       });
+
       document.getElementById('cnt-badge').textContent = `진행중 ${allOngoing.length}개`;
       renderCards(allOngoing);
-      map.flyTo([36.2, 127.9], 7, { duration: 0.8 });
+
     } else {
+      // 비활성: 원래 스타일 복원
       ongoingBarEl.style.background = '';
       ongoingBarEl.style.color = '';
       ongoingBarEl.style.borderColor = '';
+
+      // 현재 선택된 필터로 복원
       const activeBtn = document.querySelector('.f-btn.active');
       render(activeBtn ? activeBtn.dataset.cat : '전체');
     }
   });
 
+  // 하단 필터 클릭 시 진행중 모드 해제
   document.getElementById('filter-bar').addEventListener('click', e => {
     const btn = e.target.closest('.f-btn');
     if (!btn) return;
-    // 진행중 토글 해제
-    ongoingFilterActive = false;
+    ongoingMode = false;
     ongoingBarEl.style.background = '';
     ongoingBarEl.style.color = '';
     ongoingBarEl.style.borderColor = '';
