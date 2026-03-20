@@ -617,11 +617,11 @@
 
   // 방문자 카운터 — localStorage로 세션 간 유지
   (function() {
-    const REAL_BASE = 1749;         // 현재 실제 누적값 (3시간 기준)
+    const REAL_BASE = 1701;         // 현재 실제 누적값 (3시간 기준)
     const START_DATE = new Date('2026-03-20T00:00:00');
     const now = new Date();
     const hoursElapsed = (now - START_DATE) / 3600000; // 서비스 오픈 후 경과 시간(시)
-    const hourlyAvg = 240;          // 시간당 평균 방문자 (1700 / 3시간)
+    const hourlyAvg = 567;          // 시간당 평균 방문자 (1700 / 3시간)
 
     // 경과 시간 기반 추정값
     const serverEstimate = REAL_BASE + Math.floor(Math.max(0, hoursElapsed - 3) * hourlyAvg);
@@ -649,10 +649,18 @@
     }
     requestAnimationFrame(countUp);
 
-    // 시간당 567명 기준 → 평균 6.3초마다 1명 → 4~9초 랜덤 간격
+    // 시간대별 증가 간격 설정
+    // 밤 22시~07시: 느리게 (30~60초), 낮: 빠르게 (4~9초)
+    function getDelay() {
+      const h = new Date().getHours();
+      const isNight = h >= 22 || h < 7;
+      return isNight
+        ? 30000 + Math.random() * 30000   // 밤: 30~60초
+        : 4000  + Math.random() * 5000;   // 낮: 4~9초
+    }
     function startLiveCount() {
       function scheduleNext() {
-        const delay = 4000 + Math.random() * 5000;
+        const delay = getDelay();
         setTimeout(() => {
           count++;
           localStorage.setItem('bom_visitor', count);
