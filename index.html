@@ -250,7 +250,11 @@
 <body>
 
   <div id="header">
-    <div class="logo">🌸 <span>봄꽃</span></div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-sub);">
+      <span style="font-size:13px">🌸</span>
+      <span id="visitor-cnt" style="font-weight:600;color:var(--text);">...</span>
+      <span>명이 봄을 즐기는 중</span>
+    </div>
     <div class="right-wrap">
       <div id="mail-btn" title="문의하기" onclick="document.getElementById('mail-modal').style.display='flex'">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -684,6 +688,29 @@
     btn.classList.add('active');
     render(btn.dataset.cat);
   });
+
+  // 진짜 방문자 카운터 — Upstash Redis API
+  fetch('/api/visitors')
+    .then(r => r.json())
+    .then(d => {
+      const el = document.getElementById('visitor-cnt');
+      if (!el || !d.count) return;
+      const target = d.count;
+      const from = Math.max(target - 80, 0);
+      const duration = 1200;
+      const t0 = performance.now();
+      function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+      function tick(ts) {
+        const p = Math.min((ts - t0) / duration, 1);
+        el.textContent = Math.floor(from + (target - from) * easeOut(p)).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    })
+    .catch(() => {
+      const el = document.getElementById('visitor-cnt');
+      if (el) el.textContent = '🌸';
+    });
 
   </script>
 
