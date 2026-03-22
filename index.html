@@ -67,6 +67,20 @@
     #header .logo { font-size: 17px; font-weight: 700; color: var(--pink); letter-spacing: -0.3px; }
     #header .logo span { color: var(--text); }
     #header .right-wrap { display: flex; align-items: center; gap: 10px; }
+
+    /* 벚꽃 명소 토글 버튼 */
+    #spot-btn {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600;
+      padding: 5px 10px; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text-sub); cursor: pointer; white-space: nowrap;
+      transition: all 0.18s; font-family: 'Noto Sans KR', sans-serif;
+    }
+    #spot-btn.active {
+      background: #FFE8E8; color: var(--pink-dark);
+      border-color: var(--pink);
+    }
     #mail-btn {
       display: flex; align-items: center; justify-content: center;
       width: 32px; height: 32px; border-radius: 50%;
@@ -272,6 +286,7 @@
       <span>명이 봄을 즐기는 중</span>
     </div>
     <div class="right-wrap">
+      <button id="spot-btn">🌸 명소</button>
       <div id="mail-btn" title="문의하기" onclick="document.getElementById('mail-modal').style.display='flex'">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="4" width="20" height="16" rx="2"/>
@@ -780,6 +795,77 @@
         .catch(() => {});
     }, 10000);
   })();
+
+  // 벚꽃 명소 레이어 — 카카오 로컬 API
+  let spotMarkers = [];
+  let spotActive = false;
+  const spotBtn = document.getElementById('spot-btn');
+
+  function makeSpotIcon() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+      <defs>
+        <filter id="sph" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="rgba(0,0,0,0.25)"/>
+        </filter>
+      </defs>
+      <g filter="url(#sph)">
+        <circle cx="14" cy="14" r="11" fill="#FF8FAB" opacity="0.95"/>
+        <circle cx="14" cy="14" r="5" fill="white" opacity="0.9"/>
+      </g>
+    </svg>`;
+    return L.divIcon({ html: svg, className: '', iconSize:[28,28], iconAnchor:[14,14], popupAnchor:[0,-18] });
+  }
+
+  async function loadSpots() {
+    const keywords = ['벚꽃 명소', '벚꽃 축제', '벚꽃길'];
+    const allPlaces = [];
+    const seen = new Set();
+    for (const kw of keywords) {
+      try {
+        const res = await fetch(`/api/kakao-places?keyword=${encodeURIComponent(kw)}`);
+        const data = await res.json();
+        (data.places || []).forEach(p => {
+          if (!seen.has(p.name)) {
+            seen.add(p.name);
+            allPlaces.push(p);
+          }
+        });
+      } catch(e) {}
+    }
+    allPlaces.forEach(p => {
+      const popup = `<div class="pop-wrap">
+        <div class="pop-header">
+          <span class="pop-badge" style="background:#FFE8E8;color:#D94F4F;border:1px solid #ffb3c1">🌸 벚꽃 명소</span>
+        </div>
+        <div class="pop-name">${p.name}</div>
+        <div class="pop-row">📍 ${p.address}</div>
+        ${p.url ? `<a class="pop-kakao" href="${p.url}" target="_blank">🗺 카카오맵에서 보기</a>` : ''}
+      </div>`;
+      const m = L.marker([p.lat, p.lng], { icon: makeSpotIcon(), zIndexOffset: 500 })
+        .bindPopup(popup, { maxWidth: 240, closeButton: true });
+      spotMarkers.push(m);
+    });
+    spotMarkers.forEach(m => m.addTo(map));
+    spotBtn.textContent = `🌸 명소 ${allPlaces.length}개`;
+  }
+
+  spotBtn.addEventListener('click', async () => {
+    spotActive = !spotActive;
+    if (spotActive) {
+      spotBtn.classList.add('active');
+      if (spotMarkers.length === 0) {
+        spotBtn.textContent = '⏳ 불러오는 중...';
+        await loadSpots();
+      } else {
+        spotMarkers.forEach(m => m.addTo(map));
+        spotBtn.textContent = `🌸 명소 ${spotMarkers.length}개`;
+      }
+    } else {
+      spotBtn.classList.remove('active');
+      spotBtn.textContent = '🌸 명소';
+      spotMarkers.forEach(m => map.removeLayer(m));
+    }
+  });
 
   </script>
 
