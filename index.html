@@ -840,6 +840,12 @@
     return L.divIcon({ html: svg, className: '', iconSize:[28,28], iconAnchor:[14,14], popupAnchor:[0,-18] });
   }
 
+  // 직접 추가한 벚꽃 명소
+  const customSpots = [
+    {name:"중랑천 벚꽃길", address:"서울 동대문구 장안동", lat:37.566902, lng:127.074553, url:"https://map.kakao.com/link/search/중랑천 벚꽃길"},
+    {name:"송정제방공원", address:"서울 성동구 성수동1가 656-40", lat:37.549566, lng:127.058280, url:"https://map.kakao.com/link/search/송정제방공원"},
+  ];
+
   async function loadSpots() {
     const keywords = [
       '벚꽃 명소', '벚꽃길', '벚꽃 축제',
@@ -864,6 +870,14 @@
         } catch(e) {}
       }
     }
+
+    // 직접 추가한 명소 먼저 합치기
+    customSpots.forEach(p => {
+      if (!seen.has(p.name)) {
+        seen.add(p.name);
+        allPlaces.push(p);
+      }
+    });
 
     allPlaces.forEach(p => {
       const popup = `<div class="pop-wrap">
