@@ -279,6 +279,16 @@
       cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       font-family: 'Noto Sans KR', sans-serif;
     }
+    #myloc-btn {
+      position: absolute; bottom: 114px; right: 12px; z-index: 950;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: white; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: background 0.15s;
+    }
+    #myloc-btn.active { background: #E6F1FB; border-color: #378ADD; }
+    #myloc-btn:active { transform: scale(0.95); }
   </style>
 </head>
 <body>
@@ -327,6 +337,13 @@
   <div id="ongoing-bar"><b id="ongoing-cnt">0</b>개 축제 진행중 🌸</div>
 
   <button id="list-btn">☰ 목록</button>
+  <button id="myloc-btn" title="내 위치">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      <circle cx="12" cy="12" r="8" stroke-dasharray="2 3" opacity="0.4"/>
+    </svg>
+  </button>
 
   <div id="list-panel">
     <div id="list-handle">
@@ -876,6 +893,54 @@
       const activeBtn = document.querySelector('.f-btn.active');
       render(activeBtn ? activeBtn.dataset.cat : '전체');
     }
+  });
+
+  // 내 위치 버튼
+  let myLocMarker = null;
+  let myLocCircle = null;
+  let myLocActive = false;
+  const myLocBtn = document.getElementById('myloc-btn');
+
+  myLocBtn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert('이 브라우저는 위치 기능을 지원하지 않아요.');
+      return;
+    }
+    if (myLocActive) {
+      myLocActive = false;
+      myLocBtn.classList.remove('active');
+      if (myLocMarker) { map.removeLayer(myLocMarker); myLocMarker = null; }
+      if (myLocCircle) { map.removeLayer(myLocCircle); myLocCircle = null; }
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+        myLocActive = true;
+        myLocBtn.classList.add('active');
+        if (myLocMarker) map.removeLayer(myLocMarker);
+        if (myLocCircle) map.removeLayer(myLocCircle);
+        // 정확도 원
+        myLocCircle = L.circle([lat, lng], {
+          radius: accuracy, color: '#378ADD', fillColor: '#378ADD',
+          fillOpacity: 0.08, weight: 1, opacity: 0.4
+        }).addTo(map);
+        // 내 위치 마커
+        const icon = L.divIcon({
+          html: `<div style="width:16px;height:16px;border-radius:50%;background:#378ADD;border:3px solid white;box-shadow:0 2px 6px rgba(55,138,221,0.5)"></div>`,
+          className: '', iconSize:[16,16], iconAnchor:[8,8]
+        });
+        myLocMarker = L.marker([lat, lng], { icon, zIndexOffset: 2000 })
+          .bindPopup('<div class="pop-wrap"><div class="pop-name">📍 내 위치</div></div>', { maxWidth: 160 })
+          .addTo(map);
+        map.flyTo([lat, lng], 13, { duration: 0.8 });
+      },
+      err => {
+        if (err.code === 1) alert('위치 권한을 허용해주세요!');
+        else alert('위치를 가져올 수 없어요. 다시 시도해주세요.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   });
 
   </script>
