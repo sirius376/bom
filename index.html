@@ -69,6 +69,24 @@
     #header .logo { font-size: 17px; font-weight: 700; color: var(--pink); letter-spacing: -0.3px; }
     #header .logo span { color: var(--text); }
     #header .right-wrap { display: flex; align-items: center; gap: 10px; }
+
+    /* 벚꽃 명소 플로팅 버튼 */
+    #spot-btn {
+      position: absolute; bottom: 72px; left: 12px; z-index: 950;
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; font-weight: 700;
+      padding: 9px 14px; border-radius: 24px;
+      border: 1px solid var(--border);
+      background: white; color: var(--text);
+      cursor: pointer; white-space: nowrap;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+      transition: all 0.18s; font-family: 'Noto Sans KR', sans-serif;
+    }
+    #spot-btn.active {
+      background: #FFE8E8; color: var(--pink-dark);
+      border-color: var(--pink);
+      box-shadow: 0 2px 10px rgba(255,107,107,0.25);
+    }
     #mail-btn {
       display: flex; align-items: center; justify-content: center;
       width: 32px; height: 32px; border-radius: 50%;
@@ -263,6 +281,16 @@
       cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       font-family: 'Noto Sans KR', sans-serif;
     }
+    #myloc-btn {
+      position: absolute; bottom: 114px; right: 12px; z-index: 950;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: white; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: background 0.15s;
+    }
+    #myloc-btn.active { background: #E6F1FB; border-color: #378ADD; }
+    #myloc-btn:active { transform: scale(0.95); }
   </style>
 </head>
 <body>
@@ -285,6 +313,7 @@
   </div>
 
   <div id="map"></div>
+  <button id="spot-btn">🌸 명소 보기</button>
 
   <div id="ticker">
     <div id="ticker-label">📅 D-day</div>
@@ -310,6 +339,13 @@
   <div id="ongoing-bar"><b id="ongoing-cnt">0</b>개 축제 진행중 🌸</div>
 
   <button id="list-btn">☰ 목록</button>
+  <button id="myloc-btn" title="내 위치">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      <circle cx="12" cy="12" r="8" stroke-dasharray="2 3" opacity="0.4"/>
+    </svg>
+  </button>
 
   <div id="list-panel">
     <div id="list-handle">
@@ -782,6 +818,132 @@
         .catch(() => {});
     }, 10000);
   })();
+
+  // 벚꽃 명소 레이어 — 카카오 로컬 API
+  let spotMarkers = [];
+  let spotActive = false;
+  const spotBtn = document.getElementById('spot-btn');
+
+  function makeSpotIcon() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+      <defs>
+        <filter id="sph" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="rgba(0,0,0,0.25)"/>
+        </filter>
+      </defs>
+      <g filter="url(#sph)">
+        <circle cx="14" cy="14" r="11" fill="#FF8FAB" opacity="0.95"/>
+        <circle cx="14" cy="14" r="5" fill="white" opacity="0.9"/>
+      </g>
+    </svg>`;
+    return L.divIcon({ html: svg, className: '', iconSize:[28,28], iconAnchor:[14,14], popupAnchor:[0,-18] });
+  }
+
+  async function loadSpots() {
+    const keywords = ['벚꽃 명소', '벚꽃 축제', '벚꽃길'];
+    const allPlaces = [];
+    const seen = new Set();
+    for (const kw of keywords) {
+      try {
+        const res = await fetch(`/api/kakao-places?keyword=${encodeURIComponent(kw)}`);
+        const data = await res.json();
+        (data.places || []).forEach(p => {
+          if (!seen.has(p.name)) {
+            seen.add(p.name);
+            allPlaces.push(p);
+          }
+        });
+      } catch(e) {}
+    }
+    allPlaces.forEach(p => {
+      const popup = `<div class="pop-wrap">
+        <div class="pop-header">
+          <span class="pop-badge" style="background:#FFE8E8;color:#D94F4F;border:1px solid #ffb3c1">🌸 벚꽃 명소</span>
+        </div>
+        <div class="pop-name">${p.name}</div>
+        <div class="pop-row">📍 ${p.address}</div>
+        ${p.url ? `<a class="pop-kakao" href="${p.url}" target="_blank">🗺 카카오맵에서 보기</a>` : ''}
+      </div>`;
+      const m = L.marker([p.lat, p.lng], { icon: makeSpotIcon(), zIndexOffset: 500 })
+        .bindPopup(popup, { maxWidth: 240, closeButton: true });
+      spotMarkers.push(m);
+    });
+    spotMarkers.forEach(m => m.addTo(map));
+    spotBtn.textContent = `🌸 명소 ${allPlaces.length}개`;
+  }
+
+  spotBtn.addEventListener('click', async () => {
+    spotActive = !spotActive;
+    if (spotActive) {
+      spotBtn.classList.add('active');
+      // 축제 마커 숨기기
+      markers.forEach(m => map.removeLayer(m));
+      // 명소 로드 또는 표시
+      if (spotMarkers.length === 0) {
+        spotBtn.textContent = '⏳ 불러오는 중...';
+        await loadSpots();
+      } else {
+        spotMarkers.forEach(m => m.addTo(map));
+        spotBtn.textContent = `🌸 명소 ${spotMarkers.length}개`;
+      }
+    } else {
+      spotBtn.classList.remove('active');
+      spotBtn.textContent = '🌸 명소 보기';
+      // 명소 숨기기
+      spotMarkers.forEach(m => map.removeLayer(m));
+      // 축제 마커 복원 (현재 필터 기준)
+      const activeBtn = document.querySelector('.f-btn.active');
+      render(activeBtn ? activeBtn.dataset.cat : '전체');
+    }
+  });
+
+  // 내 위치 버튼
+  let myLocMarker = null;
+  let myLocCircle = null;
+  let myLocActive = false;
+  const myLocBtn = document.getElementById('myloc-btn');
+
+  myLocBtn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert('이 브라우저는 위치 기능을 지원하지 않아요.');
+      return;
+    }
+    if (myLocActive) {
+      myLocActive = false;
+      myLocBtn.classList.remove('active');
+      if (myLocMarker) { map.removeLayer(myLocMarker); myLocMarker = null; }
+      if (myLocCircle) { map.removeLayer(myLocCircle); myLocCircle = null; }
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+        myLocActive = true;
+        myLocBtn.classList.add('active');
+        if (myLocMarker) map.removeLayer(myLocMarker);
+        if (myLocCircle) map.removeLayer(myLocCircle);
+        // 정확도 원
+        myLocCircle = L.circle([lat, lng], {
+          radius: accuracy, color: '#378ADD', fillColor: '#378ADD',
+          fillOpacity: 0.08, weight: 1, opacity: 0.4
+        }).addTo(map);
+        // 내 위치 마커
+        const icon = L.divIcon({
+          html: `<div style="width:16px;height:16px;border-radius:50%;background:#378ADD;border:3px solid white;box-shadow:0 2px 6px rgba(55,138,221,0.5)"></div>`,
+          className: '', iconSize:[16,16], iconAnchor:[8,8]
+        });
+        myLocMarker = L.marker([lat, lng], { icon, zIndexOffset: 2000 })
+          .bindPopup('<div class="pop-wrap"><div class="pop-name">📍 내 위치</div></div>', { maxWidth: 160 })
+          .addTo(map);
+        map.flyTo([lat, lng], 13, { duration: 0.8 });
+      },
+      err => {
+        if (err.code === 1) alert('위치 권한을 허용해주세요!');
+        else alert('위치를 가져올 수 없어요. 다시 시도해주세요.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
 
   </script>
 
