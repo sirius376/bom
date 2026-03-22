@@ -273,6 +273,9 @@
     .card-dday.low { color: #888; background: #F0F0EE; }
 
     /* 리스트 토글 버튼 */
+    /* 줌 버튼 숨김 */
+    .leaflet-control-zoom { display: none !important; }
+
     #list-btn {
       position: absolute; bottom: 68px; right: 12px; z-index: 950;
       background: white; border: 1px solid var(--border);
@@ -287,7 +290,7 @@
       background: white; border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: background 0.15s;
+      transition: all 0.15s;
     }
     #myloc-btn.active { background: #E6F1FB; border-color: #378ADD; }
     #myloc-btn:active { transform: scale(0.95); }
@@ -340,10 +343,9 @@
 
   <button id="list-btn">☰ 목록</button>
   <button id="myloc-btn" title="내 위치">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-      <circle cx="12" cy="12" r="8" stroke-dasharray="2 3" opacity="0.4"/>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="7" r="4"/>
+      <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
     </svg>
   </button>
 
@@ -589,7 +591,6 @@
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution:'© OpenStreetMap contributors', maxZoom:18
   }).addTo(map);
-  L.control.zoom({ position:'bottomright' }).addTo(map);
 
   let markers = [];
   let ongoingMarkers = [];
