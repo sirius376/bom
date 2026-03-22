@@ -841,21 +841,30 @@
   }
 
   async function loadSpots() {
-    const keywords = ['벚꽃 명소', '벚꽃 축제', '벚꽃길'];
+    const keywords = [
+      '벚꽃 명소', '벚꽃길', '벚꽃 축제',
+      '벚꽃 공원', '벚꽃 드라이브', '벚꽃 산책로',
+      '왕벚나무', '벚꽃 호수', '벚꽃 강변'
+    ];
     const allPlaces = [];
     const seen = new Set();
+
     for (const kw of keywords) {
-      try {
-        const res = await fetch(`/api/kakao-places?keyword=${encodeURIComponent(kw)}`);
-        const data = await res.json();
-        (data.places || []).forEach(p => {
-          if (!seen.has(p.name)) {
-            seen.add(p.name);
-            allPlaces.push(p);
-          }
-        });
-      } catch(e) {}
+      for (let page = 1; page <= 2; page++) {
+        try {
+          const res = await fetch(`/api/kakao-places?keyword=${encodeURIComponent(kw)}&page=${page}`);
+          const data = await res.json();
+          (data.places || []).forEach(p => {
+            if (!seen.has(p.name)) {
+              seen.add(p.name);
+              allPlaces.push(p);
+            }
+          });
+          if (data.isEnd) break;
+        } catch(e) {}
+      }
     }
+
     allPlaces.forEach(p => {
       const popup = `<div class="pop-wrap">
         <div class="pop-header">
@@ -869,6 +878,7 @@
         .bindPopup(popup, { maxWidth: 240, closeButton: true });
       spotMarkers.push(m);
     });
+
     spotMarkers.forEach(m => m.addTo(map));
     spotBtn.textContent = `🌸 명소 ${allPlaces.length}개`;
   }

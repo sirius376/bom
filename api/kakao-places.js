@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   const keyword = req.query.keyword || '벚꽃 명소';
-  const page = req.query.page || 1;
+  const page = parseInt(req.query.page || 1);
 
   try {
     const response = await fetch(
@@ -16,7 +16,6 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // 필요한 정보만 추려서 반환
     const places = (data.documents || []).map(p => ({
       name: p.place_name,
       address: p.address_name,
