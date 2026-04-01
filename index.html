@@ -94,6 +94,14 @@
       text-decoration: none; transition: background 0.15s; cursor: pointer;
     }
     #mail-btn:hover { background: #f0f0f0; }
+    #coffee-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--bg); border: 1px solid var(--border);
+      text-decoration: none; transition: background 0.15s; cursor: pointer;
+      font-size: 16px; line-height: 1;
+    }
+    #coffee-btn:hover { background: #FFF8E7; border-color: #F5C842; }
     #header .count-badge {
       font-size: 12px; background: var(--pink-light); color: var(--pink-dark);
       padding: 4px 10px; border-radius: 20px; font-weight: 500;
@@ -305,6 +313,7 @@
       <span>명이 봄을 즐기는 중</span>
     </div>
     <div class="right-wrap">
+      <div id="coffee-btn" title="커피 한 잔 후원하기" onclick="document.getElementById('coffee-modal').style.display='flex'">☕</div>
       <div id="mail-btn" title="문의하기" onclick="document.getElementById('mail-modal').style.display='flex'">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="4" width="20" height="16" rx="2"/>
@@ -499,6 +508,7 @@
     {name:"천리포수목원 목련축제",region:"충남 태안",period:"3.27 ~ 4.19",place:"천리포수목원",cat:"기타",lat:36.8116,lng:126.3002,start:"2026-03-27",end:"2026-04-19"},
     {name:"태안세계튤립꽃박람회",region:"충남 태안",period:"4.1 ~ 5.6",place:"네이처월드",cat:"튤립",lat:36.7451,lng:126.2973,start:"2026-04-01",end:"2026-05-06"},
     {name:"청풍호 벚꽃축제",region:"충북 제천",period:"4.4 ~ 4.19",place:"청풍호 일대",cat:"벚꽃",lat:36.9927,lng:128.1673,start:"2026-04-04",end:"2026-04-19"},
+    {name:"인천대공원 벚꽃축제",region:"경기 인천",period:"4.3 ~ 4.11",place:"인천대공원",cat:"벚꽃",lat:37.4386,lng:126.7318,start:"2026-04-03",end:"2026-04-11"},
     {name:"PROMPT",region:"강원 화천",period:"5.9 ~ 5.10",place:"강원 화천군 화천읍 호음로 215",cat:"음악",lat:38.1064,lng:127.7083,start:"2026-05-09",end:"2026-05-10",link:"https://www.instagram.com/prompt_kr/",ticket:"89,000원"},
     {name:"청남대 재즈토닉",region:"충북 청주",period:"5.23 ~ 5.24",place:"충청북도 청주시 서원구 사운로 59-1",cat:"음악",lat:36.4601,lng:127.4285,start:"2026-05-23",end:"2026-05-24",link:"https://jazztonicfestival.com/",ticket:"30,000원 ~ 55,000원"},
     {name:"뷰티풀 민트 라이프",region:"서울 마포",period:"5.30 ~ 5.31",place:"문화비축기지",cat:"음악",lat:37.5654,lng:126.9026,start:"2026-05-30",end:"2026-05-31",link:"https://www.mintpaper.co.kr/",ticket:"1일권 121,000원"},
@@ -988,6 +998,16 @@
       ">moon-in@kakao.com</div>
       <a href="mailto:moon-in@kakao.com" style="display:block;padding:10px;background:#FF6B6B;color:white;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:8px;">메일 앱으로 열기</a>
       <button onclick="document.getElementById('mail-modal').style.display='none'" style="width:100%;padding:9px;background:none;border:1px solid #eee;border-radius:10px;font-size:13px;color:#888;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">닫기</button>
+    </div>
+  </div>
+  <!-- 커피 후원 모달 -->
+  <div id="coffee-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:white;border-radius:20px;padding:28px 24px;width:88%;max-width:320px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+      <div style="font-size:28px;margin-bottom:8px;">☕</div>
+      <div style="font-size:15px;font-weight:700;color:#1A1A1A;margin-bottom:6px;">커피 한 잔 후원하기</div>
+      <div style="font-size:12px;color:#888;margin-bottom:18px;">bomgoat.com을 응원해주세요 🌸<br>소중한 후원이 서비스 운영에 큰 힘이 돼요!</div>
+      <a href="https://qr.kakaopay.com/Ej7nEgB9d" target="_blank" style="display:block;padding:11px;background:#F5E000;color:#3A1D1D;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:8px;">카카오페이로 바로 후원하기</a>
+      <button onclick="document.getElementById('coffee-modal').style.display='none'" style="width:100%;padding:9px;background:none;border:1px solid #eee;border-radius:10px;font-size:13px;color:#888;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">닫기</button>
     </div>
   </div>
 
