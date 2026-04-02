@@ -1002,22 +1002,52 @@
   document.getElementById('share-btn').addEventListener('click', () => {
     document.getElementById('share-modal').style.display = 'flex';
   });
+
+  // 링크 복사 — iOS 호환 방식
   document.getElementById('share-copy').addEventListener('click', () => {
-    navigator.clipboard.writeText('https://bomgoat.com').then(() => {
-      const btn = document.getElementById('share-copy');
-      btn.textContent = '✅ 복사됐어요!';
-      setTimeout(() => {
-        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 링크 복사`;
-      }, 2000);
-    });
+    const url = 'https://bomgoat.com';
+    const btn = document.getElementById('share-copy');
+
+    // 방법 1: clipboard API (최신 브라우저)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = '✅ 복사됐어요!';
+        setTimeout(() => {
+          btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 링크 복사`;
+        }, 2000);
+      }).catch(() => fallbackCopy(url, btn));
+    } else {
+      fallbackCopy(url, btn);
+    }
   });
+
+  // iOS 등 clipboard API 미지원 시 폴백
+  function fallbackCopy(text, btn) {
+    const el = document.createElement('textarea');
+    el.value = text;
+    el.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(el);
+    el.focus(); el.select();
+    try {
+      document.execCommand('copy');
+      btn.textContent = '✅ 복사됐어요!';
+    } catch(e) {
+      btn.textContent = 'bomgoat.com';
+    }
+    document.body.removeChild(el);
+    setTimeout(() => {
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 링크 복사`;
+    }, 2000);
+  }
+
+  // 카카오톡 공유 — Web Share API 우선, 폴백은 카카오링크
   document.getElementById('share-kakao').addEventListener('click', () => {
     if (navigator.share) {
       navigator.share({
         title: '2026 봄꽃 축제 지도 🌸',
         text: '벚꽃, 진달래, 유채꽃 축제를 한눈에!',
         url: 'https://bomgoat.com'
-      });
+      }).catch(() => {});
     } else {
       window.open(`https://story.kakao.com/share?url=${encodeURIComponent('https://bomgoat.com')}`, '_blank');
     }
