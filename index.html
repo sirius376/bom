@@ -998,80 +998,35 @@
     );
   });
 
-  // 공유 버튼
+  // 공유 버튼 — 바로 Web Share API (iOS 포함 모든 기기 호환)
   document.getElementById('share-btn').addEventListener('click', () => {
-    document.getElementById('share-modal').style.display = 'flex';
-  });
-
-  // 링크 복사 — iOS 호환 방식
-  document.getElementById('share-copy').addEventListener('click', () => {
-    const url = 'https://bomgoat.com';
-    const btn = document.getElementById('share-copy');
-
-    // 방법 1: clipboard API (최신 브라우저)
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(() => {
-        btn.textContent = '✅ 복사됐어요!';
-        setTimeout(() => {
-          btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 링크 복사`;
-        }, 2000);
-      }).catch(() => fallbackCopy(url, btn));
-    } else {
-      fallbackCopy(url, btn);
-    }
-  });
-
-  // iOS 등 clipboard API 미지원 시 폴백
-  function fallbackCopy(text, btn) {
-    const el = document.createElement('textarea');
-    el.value = text;
-    el.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
-    document.body.appendChild(el);
-    el.focus(); el.select();
-    try {
-      document.execCommand('copy');
-      btn.textContent = '✅ 복사됐어요!';
-    } catch(e) {
-      btn.textContent = 'bomgoat.com';
-    }
-    document.body.removeChild(el);
-    setTimeout(() => {
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 링크 복사`;
-    }, 2000);
-  }
-
-  // 카카오톡 공유 — Web Share API 우선, 폴백은 카카오링크
-  document.getElementById('share-kakao').addEventListener('click', () => {
+    const shareData = {
+      title: '2026 봄꽃 축제 지도 🌸',
+      text: '벚꽃, 진달래, 유채꽃 축제를 한눈에!',
+      url: 'https://bomgoat.com'
+    };
     if (navigator.share) {
-      navigator.share({
-        title: '2026 봄꽃 축제 지도 🌸',
-        text: '벚꽃, 진달래, 유채꽃 축제를 한눈에!',
-        url: 'https://bomgoat.com'
-      }).catch(() => {});
+      // 모바일 전체 (iOS 사파리, iOS 크롬, 안드로이드) — 시스템 공유 시트
+      navigator.share(shareData).catch(() => {});
     } else {
-      window.open(`https://story.kakao.com/share?url=${encodeURIComponent('https://bomgoat.com')}`, '_blank');
+      // PC — 링크 복사
+      const el = document.createElement('textarea');
+      el.value = 'https://bomgoat.com';
+      el.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(el);
+      el.focus(); el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      // 버튼 피드백
+      const btn = document.getElementById('share-btn');
+      btn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2ECC71" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      setTimeout(() => {
+        btn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`;
+      }, 2000);
     }
   });
 
   </script>
-
-  <!-- 공유 모달 -->
-  <div id="share-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
-    <div style="background:white;border-radius:20px;padding:28px 24px;width:88%;max-width:320px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
-      <div style="font-size:28px;margin-bottom:8px;">🌸</div>
-      <div style="font-size:15px;font-weight:700;color:#1A1A1A;margin-bottom:6px;">공유하기</div>
-      <div style="font-size:12px;color:#888;margin-bottom:18px;">봄꽃 축제 지도를 친구에게 알려주세요!</div>
-      <button id="share-kakao" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:#F5E000;color:#3A1D1D;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="#3A1D1D"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.77 1.68 5.2 4.2 6.72L5 21l4.27-2.24C10.14 18.92 11.06 19 12 19c5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
-        카카오톡으로 공유
-      </button>
-      <button id="share-copy" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:#F7F7F7;color:#1A1A1A;border:1px solid #eee;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        링크 복사
-      </button>
-      <button onclick="document.getElementById('share-modal').style.display='none'" style="width:100%;padding:9px;background:none;border:1px solid #eee;border-radius:10px;font-size:13px;color:#888;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">닫기</button>
-    </div>
-  </div>
 
   <!-- 문의 모달 -->
   <div id="mail-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
